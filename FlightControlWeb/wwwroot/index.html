@@ -29,19 +29,29 @@
         * element that contains the map. */
         #map {
             height: 100%;
+            width: 100%;
         }
         /* Optional: Makes the sample page fill the window. */
         html, body {
             height: 100%;
+            width: 100%;
             margin: 0;
             padding: 0;
+        }
+
+        .container-fluid {
+            height: 100%;
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
         }
     </style>
 
 </head>
 <body>
-    <h3>My Google Maps Demo</h3>
-    <div id="map"></div>
+    <!-- <h3>My Google Maps Demo</h3> -->
     <script>
         function initMap() {
             var uluru = { lat: -25.363, lng: 131.044 };
@@ -53,6 +63,26 @@
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiRsf3V8b8bfumUKxSNtQylXqSSNMPwy8&callback=initMap"
             async defer></script>
-
+    <div class="container-fluid">
+        <div class="row" style="height: 100%">
+            <div class="col-9">
+                <div class="row" style="height: 79%">
+                    <div id="map"></div>
+                </div>
+                <div class="row" style="height: 1%"></div>
+                <div class="row" style="height: 20%">
+                    Flight Info
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="row" style="height: 50%">
+                    My Flights
+                </div>
+                <div class="row" style="height: 50%">
+                    External Flights
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
