@@ -1,3 +1,8 @@
+
+
+
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +14,12 @@ using FlightControlWeb.Models;
 
 namespace FlightControlWeb.Controllers
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
     public class FlightPlansController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly FlightContext _context;
         private IMemoryCache cache;
         public FlightPlansController(IMemoryCache cache)
         {
@@ -26,7 +31,7 @@ namespace FlightControlWeb.Controllers
         public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlans()
         {
             return await _context.FlightPlans.ToListAsync();
-           
+
         }
 
         // GET: api/FlightPlans/5
@@ -47,9 +52,9 @@ namespace FlightControlWeb.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlightPlan(int id, FlightPlan flightPlan)
+        public async Task<IActionResult> PutFlightPlan(string id, FlightPlan flightPlan)
         {
-            if (id != flightPlan.id)
+            if (id != flightPlan.flight_id)
             {
                 return BadRequest();
             }
@@ -84,12 +89,12 @@ namespace FlightControlWeb.Controllers
             _context.FlightPlans.Add(flightPlan);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFlightPlan", new { id = flightPlan.id }, flightPlan);
+            return CreatedAtAction("GetFlightPlan", new { id = flightPlan.flight_id }, flightPlan);
         }
 
         // DELETE: api/FlightPlans/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<FlightPlan>> DeleteFlightPlan(int id)
+        public async Task<ActionResult<FlightPlan>> DeleteFlightPlan(string id)
         {
             var flightPlan = await _context.FlightPlans.FindAsync(id);
             if (flightPlan == null)
@@ -103,9 +108,9 @@ namespace FlightControlWeb.Controllers
             return flightPlan;
         }
 
-        private bool FlightPlanExists(int id)
+        private bool FlightPlanExists(string id)
         {
-            return _context.FlightPlans.Any(e => e.id == id);
+            return _context.FlightPlans.Any(e => e.flight_id == id);
         }
 
     }

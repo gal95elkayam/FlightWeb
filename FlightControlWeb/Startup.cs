@@ -25,7 +25,7 @@ namespace FlightControlWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<TodoContext>(opt =>opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<FlightContext>(opt =>opt.UseInMemoryDatabase("FlifhtList"));
             services.AddControllers();
             services.AddMemoryCache();
         }
@@ -37,6 +37,7 @@ namespace FlightControlWeb
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseDefaultFiles();
             app.UseStaticFiles();
 

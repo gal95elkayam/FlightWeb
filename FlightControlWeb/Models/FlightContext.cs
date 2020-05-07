@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
 {
-    public class TodoContext : DbContext
+    public class FlightContext : DbContext
     {
-        public TodoContext(DbContextOptions<TodoContext> options)
+        public FlightContext(DbContextOptions<FlightContext> options)
             : base(options)
         {
         }

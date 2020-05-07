@@ -13,9 +13,9 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly FlightContext _context;
 
-        public FlightsController(TodoContext context)
+        public FlightsController(FlightContext context)
         {
             _context = context;
         }
@@ -45,7 +45,7 @@ namespace FlightControlWeb.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlight(int id, Flight flight)
+        public async Task<IActionResult> PutFlight(string id, Flight flight)
         {
             if (id != flight.flight_id)
             {
@@ -101,7 +101,7 @@ namespace FlightControlWeb.Controllers
             return flight;
         }
 
-        private bool FlightExists(int id)
+        private bool FlightExists(string id)
         {
             return _context.Flights.Any(e => e.flight_id == id);
         }
