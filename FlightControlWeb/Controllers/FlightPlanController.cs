@@ -1,0 +1,164 @@
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using FlightControlWeb.Models;
+using Microsoft.AspNetCore.Routing.Constraints;
+using System.Runtime.InteropServices.ComTypes;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace FlightControlWeb.Controllers
+{
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FlightPlanController : ControllerBase
+    {
+        private readonly DBContext _context;
+        private IMemoryCache cache;
+        public FlightPlanController(DBContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/FlightPlan
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlan()
+        {
+            List<FlightPlan> list = await _context.FlightPlan.ToListAsync();
+            // insert all the location's data and segments's data
+            foreach (FlightPlan flight in list)
+            {  
+                string tempId = flight.id;
+                List<Location> locationsList = await _context.Locations.ToListAsync();
+                List<Segment> segmentsList = await _context.Segments.ToListAsync();
+                //get the location and the segments according to the id
+                Location thisLocation = locationsList.Where(a => a.id == tempId).First();
+                List<Segment> thisSegments = segmentsList.Where(a => a.id == tempId).ToList();
+
+                flight.Segments = thisSegments;
+                flight.Initial_location = thisLocation;
+            }
+            return await _context.FlightPlan.ToListAsync();
+
+        }
+
+        // GET: api/FlightPlan/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<FlightPlan>> GetFlightPlan(string id)
+        {
+            var flightPlan = await _context.FlightPlan.FindAsync(id);
+
+            if (flightPlan == null)
+            {
+                return NotFound();
+            }
+
+            string tempId = flightPlan.id;
+            List<Location> locationsList = await _context.Locations.ToListAsync();
+            List<Segment> segmentsList = await _context.Segments.ToListAsync();
+            //get the location and the segments according to the id
+            Location thisLocation = locationsList.Where(a => a.id == tempId).First();
+            List<Segment> thisSegments = segmentsList.Where(a => a.id == tempId).ToList();
+
+            flightPlan.Segments = thisSegments;
+            flightPlan.Initial_location = thisLocation;
+
+
+
+            return flightPlan;
+        }
+
+        // PUT: api/FlightPlan/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutFlightPlan(string id, FlightPlan flightPlan)
+        {
+            if (id != flightPlan.id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(flightPlan).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!FlightPlanExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+
+        static string Id = "100000"; //change to another id!
+        // POST: api/FlightPlan
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
+        public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
+        {
+            flightPlan.is_external = false; // change it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            flightPlan.id = Id;
+            int tempId = Int32.Parse(Id);
+            tempId++;
+            Id = tempId.ToString();
+            var segmentList = flightPlan.Segments;
+            foreach (Segment element in segmentList)
+            {
+                element.id = flightPlan.id;
+                // insert the segments to the DB
+                _context.Segments.Add(element);
+            }
+
+            flightPlan.Initial_location.id = flightPlan.id;
+            // insert the location to the DB of the locations.
+            _context.FlightPlan.Add(flightPlan);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetFlightPlan", new { id = flightPlan.id }, flightPlan);
+        }
+
+        // DELETE: api/FlightPlan/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<FlightPlan>> DeleteFlightPlan(string id)
+        {
+            var flightPlan = await _context.FlightPlan.FindAsync(id);
+            if (flightPlan == null)
+            {
+                return NotFound();
+            }
+
+            _context.FlightPlan.Remove(flightPlan);
+            await _context.SaveChangesAsync();
+
+            return flightPlan;
+        }
+
+        private bool FlightPlanExists(string id)
+        {
+            return _context.FlightPlan.Any(e => e.id == id);
+        }
+
+    }
+
+}

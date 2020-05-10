@@ -7,7 +7,7 @@ namespace FlightControlWeb.Models
 {
     public class Segment
     {
-        public string Id { get; set; }
+        public string id { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public int timespan_seconds { get; set; }

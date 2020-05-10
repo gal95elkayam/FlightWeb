@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightContext : DbContext
+    public class DBContext : DbContext
     {
-        public FlightContext(DbContextOptions<FlightContext> options)
+        public DBContext(DbContextOptions<DBContext> options)
             : base(options)
         {
         }
 
         public DbSet<Flight> Flights { get; set; }
-        public DbSet<FlightPlan> FlightPlans { get; set; }
+        public DbSet<FlightPlan> FlightPlan { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Segment> Segments { get; set; }
     }
 }
