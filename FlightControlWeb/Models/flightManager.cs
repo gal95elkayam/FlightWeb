@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace FlightControlWeb.Models
 {
     public class FlightManager : IFlightManager
@@ -16,6 +17,7 @@ namespace FlightControlWeb.Models
             new Flight { flight_id ="218" , longitude=73.244, latitude=98.12, passengers=216, company_name=  "SgggsAir", date_time= "2027-12-26T23:56:21Z",is_external=false }
 
             };
+        private object flightManager;
 
         public Location getInitialLocation(FlightPlan flight, DBContext context)
         {
@@ -50,6 +52,28 @@ namespace FlightControlWeb.Models
                 return false;
             }
         }
+
+        public async Task<Flight> FromInternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        {
+            if(flightPlan.is_external == false && await checkIfCurrAsync(relativeDate, flightPlan, _context))
+            {
+                Flight flightToInsert = planToFlight(flightPlan, _context);
+                return flightToInsert;
+            }
+            return null;
+        }
+
+        public async Task<Flight> FromInternalAndExternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        {
+            if (await checkIfCurrAsync(relativeDate, flightPlan, _context))
+            {
+                Flight flightToInsert = planToFlight(flightPlan, _context);
+                return flightToInsert;
+            }
+            return null;
+        }
+
+
 
         public async Task<int> calcSecOfFlightAsync(FlightPlan flightPlan, DBContext context)
         {

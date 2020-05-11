@@ -1,8 +1,4 @@
 
-
-
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +47,18 @@ namespace FlightControlWeb.Controllers
 
         }
 
+        bool beginWith(string a, string begining)
+        {
+            string beg = a.Substring(0, 6);
+            if (string.Compare(a.Substring(0,6), begining) == 0 )
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+
         // GET: api/FlightPlan/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FlightPlan>> GetFlightPlan(string id)
@@ -66,8 +74,8 @@ namespace FlightControlWeb.Controllers
             List<Location> locationsList = await _context.Locations.ToListAsync();
             List<Segment> segmentsList = await _context.Segments.ToListAsync();
             //get the location and the segments according to the id
-            Location thisLocation = locationsList.Where(a => a.id == tempId).First();
-            List<Segment> thisSegments = segmentsList.Where(a => a.id == tempId).ToList();
+            Location thisLocation = locationsList.Where(a => a.id == tempId).First();        
+            List <Segment> thisSegments = segmentsList.Where(a => beginWith(a.id,tempId) == true).ToList();
 
             flightPlan.Segments = thisSegments;
             flightPlan.Initial_location = thisLocation;
@@ -119,22 +127,23 @@ namespace FlightControlWeb.Controllers
         {
             flightPlan.is_external = false; // change it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             flightPlan.id = Id;
-            int tempId = Int32.Parse(Id);
-            tempId++;
-            Id = tempId.ToString();
+            int tempId = Int32.Parse(Id);   
             var segmentList = flightPlan.Segments;
-            foreach (Segment element in segmentList)
+            int i = 0;
+            foreach (Segment s in segmentList)
             {
-                element.id = flightPlan.id;
+                s.id = string.Concat(Id, i.ToString());
+                i++;
                 // insert the segments to the DB
-                _context.Segments.Add(element);
+                _context.Segments.Add(s);
             }
 
             flightPlan.Initial_location.id = flightPlan.id;
             // insert the location to the DB of the locations.
             _context.FlightPlan.Add(flightPlan);
             await _context.SaveChangesAsync();
-
+            tempId++;
+            Id = tempId.ToString();
             return CreatedAtAction("GetFlightPlan", new { id = flightPlan.id }, flightPlan);
         }
 

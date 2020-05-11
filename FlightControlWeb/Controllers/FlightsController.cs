@@ -50,19 +50,31 @@ namespace FlightControlWeb.Controllers
         {
             DateTime relativeDate = DateTime.Parse(relative_to.Substring(0,20));
             List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
-    
+            List<Server> externalServers = await _context.Servers.ToListAsync();
             var resultList = new List<Flight>();
             foreach (FlightPlan flightPlan in flightsList)
             {
-                if ((!relative_to.Contains("&sync_all")) && flightPlan.is_external == true)
-                {
-                    continue;
-                }
-                else if (await flightManager.checkIfCurrAsync(relativeDate, flightPlan, _context)){
-                        Flight flightToInsert = flightManager.planToFlight(flightPlan, _context);
-                        resultList.Add(flightToInsert);
-                }
+                resultList.Add(await flightManager.FromInternal(relativeDate, flightPlan, _context));
+                //if (relative_to.Contains("&sync_all"))
+                //{
+                //    resultList.Add(await flightManager.FromInternalAndExternal(relativeDate, flightPlan, _context));
+                //} else
+                //{
+                //    resultList.Add(await flightManager.FromInternal(relativeDate, flightPlan, _context));
+                //}
             }
+            // from here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //if (relative_to.Contains("&sync_all"))
+            //{
+            //    foreach(Server s in externalServers)
+            //    {
+            //        s.addExternalFlights(resultList, relativeDate);
+            //        ///////// here
+
+            //        resultList.Add(await flightManager.FromExternal(relativeDate, flightPlan, _context));
+            //    }
+                
+            //}
             return resultList;
         }
 
