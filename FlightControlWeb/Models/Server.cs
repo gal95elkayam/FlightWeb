@@ -15,10 +15,10 @@ namespace FlightControlWeb.Models
         public void addExternalFlights(List<Flight> resultList, DateTime relativeDate)
         {
 
-            var url = string.Concat(this.ServerURL, "/api/Flights?relative_to=", relativeDate,ToString());
-            $.getJSON(url, function (data) {
+            //var url = string.Concat(this.ServerURL, "/api/Flights?relative_to=", relativeDate,ToString());
+            //$.getJSON(url, function (data) {
 
-            }
+            //}
             
 
 
