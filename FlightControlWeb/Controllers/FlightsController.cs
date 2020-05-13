@@ -48,6 +48,10 @@ namespace FlightControlWeb.Controllers
         [Obsolete]
         public async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
         {
+            if (relative_to == null)
+            {
+                return flightManager.flights ; /////check what to do!!!!!!!!!!!!
+            }
             DateTime relativeDate = DateTime.Parse(relative_to.Substring(0,20));
             List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
             List<Server> externalServers = await _context.Servers.ToListAsync();

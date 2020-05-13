@@ -9,19 +9,19 @@ if (typeof $ === 'undefined') {
     alert('Bootstrap\'s JavaScript requires jQuery. jQuery must be included before Bootstrap\'s JavaScript.');
 }
 
-$(document).ready(function () {
-    setInterval(function () {
-        $.ajax({
-            url: "https://localhost:44355/api/flights",
-            success:
-                function (data) {
-                    //debugger;
-                    //let a = data[0];
-                    //$('#flightInfo').html(a.company_name); //insert text of test.php into your div
-                },
-        });
-    }, 3000);
-});
+//$(document).ready(function () {
+//    setInterval(function () {
+//        $.ajax({
+//            url: "https://localhost:44355/api/flights",
+//            success:
+//                function (data) {
+//                    //debugger;
+//                    //let a = data[0];
+//                    //$('#flightInfo').html(a.company_name); //insert text of test.php into your div
+//                },
+//        });
+//    }, 3000);
+//});
 
 function postNewFlight(flight) {
       
