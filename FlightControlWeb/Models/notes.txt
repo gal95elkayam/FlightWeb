@@ -1,1 +1,8 @@
-﻿https://localhost:44355/api/Flights?relative_to=2021-12-26T20:56:21Z
+﻿https://localhost:44355/api/Flights?relative_to=2021-12-26T23:58:21Z
+
+test yuval:
+more than 10 segments
+
+2 filghts 2 gets
+
+

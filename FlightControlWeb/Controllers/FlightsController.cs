@@ -50,35 +50,25 @@ namespace FlightControlWeb.Controllers
         {
             if (relative_to == null)
             {
-                return flightManager.flights ; /////check what to do!!!!!!!!!!!!
+                return flightManager.flights ; /////cange it to notFount() !!!!!!!! just for tests
             }
-            DateTime relativeDate = DateTime.Parse(relative_to.Substring(0,20));
+            string urlRequest = Request.QueryString.Value;
+            DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0,20)));
             List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
-            List<Server> externalServers = await _context.Servers.ToListAsync();
+            
             var resultList = new List<Flight>();
             foreach (FlightPlan flightPlan in flightsList)
             {
-                resultList.Add(await flightManager.FromInternal(relativeDate, flightPlan, _context));
-                //if (relative_to.Contains("&sync_all"))
-                //{
-                //    resultList.Add(await flightManager.FromInternalAndExternal(relativeDate, flightPlan, _context));
-                //} else
-                //{
-                //    resultList.Add(await flightManager.FromInternal(relativeDate, flightPlan, _context));
-                //}
+                resultList.Add(await flightManager.fromInternal(relativeDate, flightPlan, _context));     
             }
-            // from here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //if (relative_to.Contains("&sync_all"))
-            //{
-            //    foreach(Server s in externalServers)
-            //    {
-            //        s.addExternalFlights(resultList, relativeDate);
-            //        ///////// here
-
-            //        resultList.Add(await flightManager.FromExternal(relativeDate, flightPlan, _context));
-            //    }
-                
-            //}
+            if (urlRequest.Contains("&sync_all"))
+            {
+                var fromExt = await flightManager.fromExternal(relativeDate, _context);
+                foreach (Flight f in fromExt)
+                {
+                    resultList.Add(f);
+                }
+            }
             return resultList;
         }
 

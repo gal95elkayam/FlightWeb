@@ -1,7 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 
@@ -37,7 +40,7 @@ namespace FlightControlWeb.Models
         public async Task<bool> checkIfCurrAsync(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
         {
             int secondsForFlight = await calcSecOfFlightAsync(flightPlan, _context);
-            DateTime flightBeginDate = DateTime.Parse(getInitialLocation(flightPlan, _context).date_time);
+            DateTime flightBeginDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(getInitialLocation(flightPlan, _context).date_time));
             DateTime flightEndDate = flightBeginDate.AddSeconds(secondsForFlight);
 
             // check if the flight is now:
@@ -55,25 +58,84 @@ namespace FlightControlWeb.Models
             }
         }
 
-        public async Task<Flight> FromInternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        public async Task<Flight> fromInternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
         {
-            if(flightPlan.is_external == false && await checkIfCurrAsync(relativeDate, flightPlan, _context))
+            if (flightPlan.is_external == false && await checkIfCurrAsync(relativeDate, flightPlan, _context))
             {
-                Flight flightToInsert = planToFlight(flightPlan, _context);
+                Flight flightToInsert = planToFlight(flightPlan, _context, relativeDate);
+                flightToInsert.is_external = false;
                 return flightToInsert;
             }
             return null;
         }
 
-        public async Task<Flight> FromInternalAndExternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        string toTwoCharString(string toString)
         {
-            if (await checkIfCurrAsync(relativeDate, flightPlan, _context))
+            if (toString.Length == 1)
             {
-                Flight flightToInsert = planToFlight(flightPlan, _context);
-                return flightToInsert;
+                return string.Concat("0", toString);
             }
-            return null;
+            return toString;
         }
+
+        public async Task<List<Flight>> fromExternal(DateTime relativeDate, DBContext _context)
+        { 
+            List<Server> externalServers = await _context.Servers.ToListAsync();
+            List<Flight> resList = new List<Flight>();
+            foreach (Server s in externalServers)
+            {
+                string url = s.ServerURL;
+                url = string.Concat(url, "/api/Flights?relative_to=");
+                //IEnumerable<string> list = new List<string>() { relativeDate.Year.ToString() , "-", relativeDate.Month.ToString(), "-", relativeDate.Day.ToString(), "T", };
+                IEnumerable<string> list = new List<string>(){url,relativeDate.Year.ToString(), "-", toTwoCharString(relativeDate.Month.ToString()),
+                    "-", toTwoCharString(relativeDate.Day.ToString()), "T",
+                        toTwoCharString(relativeDate.Hour.ToString()), ":", toTwoCharString(relativeDate.Minute.ToString()) , ":", toTwoCharString(relativeDate.Second.ToString()), "Z"};
+                url = string.Concat(list);
+                string urlPath = string.Format(url);
+                WebRequest requestObjGet = WebRequest.Create(urlPath);
+                requestObjGet.Method = "GET";
+                HttpWebResponse responseObjGet = null;
+                responseObjGet = (HttpWebResponse)requestObjGet.GetResponse();
+                string strRes = null;
+                List<Flight> listOfFlights = null;
+                using (Stream stream = responseObjGet.GetResponseStream())
+                {
+                    StreamReader sr = new StreamReader(stream);
+                    strRes = sr.ReadToEnd();
+                    sr.Close();
+                }
+                //string check = strRes.Substring(2, strRes.Length - 3);
+                //string check1 = strRes.Substring(1, strRes.Length - 2);
+                //Console.WriteLine(check1);
+                listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
+                foreach (Flight f in listOfFlights)
+                {
+                    f.is_external = true;
+                }
+                resList.AddRange(listOfFlights);
+            }
+            return resList;
+        }
+
+        //public async Task<Flight> FromInternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        //{
+        //    if(flightPlan.is_external == false && await checkIfCurrAsync(relativeDate, flightPlan, _context))
+        //    {
+        //        Flight flightToInsert = planToFlight(flightPlan, _context, relativeDate);
+        //        return flightToInsert;
+        //    }
+        //    return null;
+        //}
+
+        //public async Task<Flight> FromInternalAndExternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
+        //{
+        //    if (await checkIfCurrAsync(relativeDate, flightPlan, _context))
+        //    {
+        //        Flight flightToInsert = planToFlight(flightPlan, _context, relativeDate);
+        //        return flightToInsert;
+        //    }
+        //    return null;
+        //}
 
 
         bool beginWith(string a, string begining)
@@ -103,38 +165,31 @@ namespace FlightControlWeb.Models
             return time;
         }
 
-        private async void findCurrSeg(FlightPlan flightPlan, DBContext context, Flight flightFromPlan)
+        private async void findCurrSeg(FlightPlan flightPlan, DBContext context, Flight flightFromPlan, DateTime relativeDate)
         {
             double longBegin = flightPlan.Initial_location.Longitude;
             double latBegin = flightPlan.Initial_location.Latitude;
             List<Segment> segment = await context.Segments.ToListAsync();
             DateTime begin;
-            DateTime end = DateTime.Parse(getInitialLocation(flightPlan, context).date_time);
+            DateTime end = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(getInitialLocation(flightPlan, context).date_time));
             foreach (Segment s in segment)
             {
-                begin = end;
-                end = begin.AddSeconds(s.timespan_seconds);
                 if (beginWith(s.id,flightPlan.id))
                 {
+                    begin = end;
+                    end = begin.AddSeconds(s.timespan_seconds);
                     //check if the flight is now:
                     //if begin < relative: res is -
-                    int beginCompRel = DateTime.Compare(begin, DateTime.ParseExact("2021-12-26T21:17:22Z", "yyyy-MM-ddTHH:mm:ssZ", null));
+                    int beginCompRel = DateTime.Compare(begin, relativeDate);
                     //if relative < end: res is -
-                    int endCompRel = DateTime.Compare(DateTime.Parse("2021-12-26T21:17:22Z"), end);
-
-                    ///////////////////////////////////////////////////change it to now!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    // check if the flight is now:
-                    // if begin < relative: res is -
-                    //int beginCompRel = DateTime.Compare(begin, DateTime.Now);
-                    // if relative < end: res is -
-                    //int endCompRel = DateTime.Compare(DateTime.Now, end);
+                    int endCompRel = DateTime.Compare(relativeDate, end);
 
                     if (beginCompRel <= 0 && endCompRel <= 0)
                     {
-                        //double relativeTimePassed = (DateTime.Now - begin).TotalSeconds / (begin - end).TotalSeconds; -- change to it!!
-                        double relativeTimePassed = (DateTime.Parse("2021-12-26T21:17:22Z") - begin).TotalSeconds / (end - begin).TotalSeconds;
+                        double relativeTimePassed = (relativeDate - begin).TotalSeconds / (end - begin).TotalSeconds;
                         flightFromPlan.longitude = longBegin + relativeTimePassed*(s.Longitude - longBegin);
                         flightFromPlan.latitude = latBegin + relativeTimePassed * (s.Latitude - latBegin);
+                        break;
                     }
                 }
                 longBegin = s.Longitude;
@@ -144,15 +199,15 @@ namespace FlightControlWeb.Models
         }
 
 
-        public Flight planToFlight(FlightPlan flightPlan, DBContext context)
+        public Flight planToFlight(FlightPlan flightPlan, DBContext context, DateTime relativeDate)
         {
             Flight flightFromPlan = new Flight();
             flightFromPlan.flight_id = flightPlan.id;
-            findCurrSeg(flightPlan, context, flightFromPlan);
+            findCurrSeg(flightPlan, context, flightFromPlan, relativeDate);
             flightFromPlan.passengers = flightPlan.passengers;
             flightFromPlan.company_name = flightPlan.company_name;
             flightFromPlan.date_time = getInitialLocation(flightPlan, context).date_time; // change to the time now?
-            flightFromPlan.is_external = flightPlan.is_external;
+            //flightFromPlan.is_external = flightPlan.is_external;
             return flightFromPlan;
         }
 

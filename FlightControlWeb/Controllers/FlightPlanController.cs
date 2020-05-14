@@ -117,8 +117,24 @@ namespace FlightControlWeb.Controllers
             return NoContent();
         }
 
+        string createRandomId()
+        {
+            var charsBig = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var charsSmall = "abcdefghijklmnopqrstuvwxyz";
+            var nums = "0123456789";
+            var stringChars = new char[6];
+            var random = new Random();
+            stringChars[0] = charsBig[random.Next(charsBig.Length)];
+            stringChars[1] = charsBig[random.Next(charsBig.Length)];
+            stringChars[2] = charsSmall[random.Next(charsBig.Length)];
+            stringChars[3] = charsSmall[random.Next(charsSmall.Length)];
+            stringChars[4] = nums[random.Next(nums.Length)];
+            stringChars[5] = nums[random.Next(nums.Length)];
+            return new String(stringChars);
+        }
 
-        static string Id = "100000"; //change to another id!
+
+        //static string Id = "100000"; //change to another id!
         // POST: api/FlightPlan
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -126,13 +142,13 @@ namespace FlightControlWeb.Controllers
         public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
             flightPlan.is_external = false; // change it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            flightPlan.id = Id;
-            int tempId = Int32.Parse(Id);   
+            flightPlan.id = createRandomId();
+            //int tempId = Int32.Parse(Id);   
             var segmentList = flightPlan.Segments;
             int i = 0;
             foreach (Segment s in segmentList)
             {
-                s.id = string.Concat(Id, i.ToString());
+                s.id = string.Concat(flightPlan.id, i.ToString());
                 i++;
                 // insert the segments to the DB
                 _context.Segments.Add(s);
@@ -142,8 +158,8 @@ namespace FlightControlWeb.Controllers
             // insert the location to the DB of the locations.
             _context.FlightPlan.Add(flightPlan);
             await _context.SaveChangesAsync();
-            tempId++;
-            Id = tempId.ToString();
+           // tempId++;
+            //Id = tempId.ToString();
             return CreatedAtAction("GetFlightPlan", new { id = flightPlan.id }, flightPlan);
         }
 
