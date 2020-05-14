@@ -5,11 +5,13 @@
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 
     <!-- jQuery library -->
+    <script src="jquery-3.5.1.min.js"></script>
+
+    <!-- bootstrap library -->
     <script src="bootstrap/js/bootstrap.min.js"></script>
 
     <!-- Popper JS -->
-    <script src="bootstrap/js/jquery-3.4.1.slim.min.js"></script>
-
+    <!--<script src="bootstrap/js/jquery-3.4.1.slim.min.js"></script>-->
     <!-- Latest compiled JavaScript -->
     <script src="bootstrap/js/popper.min.js"></script>
 
@@ -21,66 +23,60 @@
             integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
             crossorigin="">
     </script>
+
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+
     <title>Simple Map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <style>
-        /* Always set the map height explicitly to define the size of the div
-        * element that contains the map. */
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-        /* Optional: Makes the sample page fill the window. */
-        html, body {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container-fluid {
-            height: 100%;
-            width: 100%;
-            padding-right: 15px;
-            padding-left: 15px;
-            margin-right: auto;
-            margin-left: auto;
-        }
-    </style>
-
 </head>
 <body>
-    <!-- <h3>My Google Maps Demo</h3> -->
-    <script>
-        function initMap() {
-            var uluru = { lat: -25.363, lng: 131.044 };
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 4,
-                center: uluru
-            });
-        }
-    </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiRsf3V8b8bfumUKxSNtQylXqSSNMPwy8&callback=initMap"
             async defer></script>
-    <div class="container-fluid">
-        <div class="row" style="height: 100%">
-            <div class="col-9">
-                <div class="row" style="height: 79%">
-                    <div id="map"></div>
-                </div>
-                <div class="row" style="height: 1%"></div>
-                <div class="row" style="height: 20%">
-                    Flight Info
-                </div>
+
+    <div class="grid-container">
+        <div class="map_info">
+            <div class="map mr-1" id="map"></div>
+            <div class="info">
+                <div class="flight_id"><h3>Flight <span id="flight_info_id"></span></h3></div>
+                <div class="lon">Longitude: <span id="flight_info_lon"></span></div>
+                <div class="lat">Latitude: <span id="flight_info_lat"></span></div>
+                <div class="passengers">Passengers: <span id="flight_info_pas"></span></div>
+                <div class="company">Company Name: <span id="flight_info_com"></span></div>
+                <div class="date_time">Date Time: <span id="flight_info_time"></span></div>
+                <div class="is_external">Is External: <span id="flight_info_ext"></span></div>
             </div>
-            <div class="col-2">
-                <div class="row" style="height: 50%">
-                    My Flights
-                </div>
-                <div class="row" style="height: 50%">
-                    External Flights
-                </div>
+        </div>
+        <div class="flights">
+            <div class="drop_box text-center">Drop the file here.</div>
+            <div class="internal">
+                <h3>Internal Flights</h3>
+                <table id="internalFlightsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Company Name</th>
+                            <th>Passengers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="external">
+                <h3>External Flights</h3>
+                <table id="externalFlightsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Company Name</th>
+                            <th>Passengers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

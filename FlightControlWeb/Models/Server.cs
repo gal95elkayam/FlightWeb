@@ -16,11 +16,6 @@ namespace FlightControlWeb.Models
         {
 
             var url = string.Concat(this.ServerURL, "/api/Flights?relative_to=", relativeDate,ToString());
-            $.getJSON(url, function (data) {
-
-            }
-            
-
 
         }
     }
