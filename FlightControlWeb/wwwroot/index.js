@@ -1,3 +1,6 @@
+const updateDelay = 3000;
+const relativeErrorCounterMax = 60000 / updateDelay;
+let relativeErrorCounter = relativeErrorCounterMax;
 let flightsId = [];
 let dragEventCounter = 0;
 
@@ -8,7 +11,7 @@ if (typeof $ === 'undefined') {
 $(document).ready(function () {
     $(".drop_box").hide();
     UpdateFlightsTables();
-    setInterval(UpdateFlightsTables, 3000);
+    setInterval(UpdateFlightsTables, updateDelay);
 
     $("#internalFlightsTable").on("click", ".ibtnDel", DeleteFlightClick);
 
@@ -41,6 +44,15 @@ function UpdateFlightsTables() {
     const relative = curUrl.searchParams.get("relative_to");
     const sync = curUrl.searchParams.get("sync");
     const url = "/api/Flights?relative_to=" + relative + (sync ? "&sync=" + sync : "");
+
+    if (!relative) {
+        relativeErrorCounter++;
+        if (relativeErrorCounter >= relativeErrorCounterMax) {
+            alert("please add relative_to parameter");
+            relativeErrorCounter = 0;
+        }
+        return;
+    }
 
     $.ajax({
         url: url,
