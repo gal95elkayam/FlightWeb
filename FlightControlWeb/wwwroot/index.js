@@ -1,4 +1,5 @@
-flightsId = [];
+let flightsId = [];
+let dragEventCounter = 0;
 
 if (typeof $ === 'undefined') {
     alert('jQuery must be included.');
@@ -14,20 +15,13 @@ $(document).ready(function () {
     $(".flights").on("click", "td[informative]", FlightClick);
 
     $(".flights").on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+        // Prevent default behavior (Prevent file from being opened)
         e.preventDefault();
         e.stopPropagation();
     })
 
-    $(".flights").on('dragover dragenter', function () {
-        $(".internal").hide();
-        $(".external").hide();
-        $(".drop_box").show();
-    })
-    $(".flights").on('dragleave dragend drop', function () {
-        $(".drop_box").hide();
-        $(".internal").show();
-        $(".external").show();
-    })
+    $(".flights").on('dragenter', flightsDragHandler);
+    $(".flights").on('dragleave dragend drop', flightsDragEndHandler)
     $(".flights").on('drop', flightsDropHandler);
 
 });
@@ -41,16 +35,15 @@ function initMap() {
     });
 }
 
-// show the error of a http request.
-function requestErrorMessage(xhr) {
-    alert(xhr.responseJSON.status + " - " + xhr.responseJSON.title);
-}
-
-
 // get flights from database and update the flights tables.
 function UpdateFlightsTables() {
+    const curUrl = new URL(window.location);
+    const relative = curUrl.searchParams.get("relative_to");
+    const sync = curUrl.searchParams.get("sync");
+    const url = "/api/Flights?relative_to=" + relative + (sync ? "&sync=" + sync : "");
+
     $.ajax({
-        url: "/api/Flights?relative_to=2020-12-26T23:56:21Z",
+        url: url,
         success:
             function (flights) {
                 let newFlightsId = [];
@@ -68,9 +61,9 @@ function UpdateFlightsTables() {
                 // remove deleted flights from tables
                 for (const flightId of flightsId) {
                     if (!newFlightsId.includes(flightId)) {
-                        // if the row is clicked
-                        if (!$("#" + flightId + " [bold]").length) {
-                            EmptyFlightInfo();
+                        // if the row is bold
+                        if (flightIsBold(flightId)) {
+                            flightUnbold(flightsId);
                         }
 
                         // remove the flight from table
@@ -79,7 +72,8 @@ function UpdateFlightsTables() {
                 }
 
                 flightsId = newFlightsId;
-            }
+            },
+        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 }
 
@@ -89,16 +83,18 @@ function AddNewFlightPlan(flightPlanText) {
         alert("the text is not in a json format");
     }
 
+    const url = "/api/FlightPlan";
+
     $.ajax({
         type: "POST",
-        url: "/api/FlightPlan",
+        url: url,
         contentType: "application/json",
         data: flightPlanText,
         success: function (data) {
             alert("file uploaded successfuly");
             UpdateFlightsTables();
         },
-        error: requestErrorMessage
+        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 
 }
@@ -123,9 +119,11 @@ function FlightToTableRowHTML(flight) {
 
 // update the flight information in the flight info section.
 function UpdateFlightInfo(flightId) {
+    const url = "/api/FlightPlan/" + flightId;
+
     $.ajax({
         type: "GET",
-        url: "/api/FlightPlan/" + flightId,
+        url: url,
         contentType: "application/json",
         success: function (flightPlan) {
             $("#flight_info_id").html(flightPlan.id);
@@ -136,7 +134,7 @@ function UpdateFlightInfo(flightId) {
             $("#flight_info_time").html(flightPlan.initial_location.date_time);
             $("#flight_info_ext").html(flightPlan.is_external.toString());
         },
-        error: requestErrorMessage
+        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 }
 
@@ -154,21 +152,22 @@ function EmptyFlightInfo() {
 function DeleteFlightClick() {
     const rowToRemove = this.parentElement.parentElement;
     const flightId = rowToRemove.firstChild.textContent;
+    const url = "/api/Flights/" + flightId;
 
     // deleting bolded row?
-    if ($("#" + flightId + "[bold]").length) {
-        EmptyFlightInfo();
+    if (flightIsBold(flightId)) {
+        flightUnbold(flightId);
     }
 
     $.ajax({
         type: "DELETE",
-        url: "/api/Flights/" + flightId,
+        url: url,
         success:
             function () {
                 rowToRemove.remove();
                 alert("flight " + flightId + " was deleted successfuly");
             },
-        error: requestErrorMessage
+        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 }
 
@@ -177,18 +176,19 @@ function FlightClick() {
     const row = this.parentElement;
     const flightId = row.firstChild.textContent;
 
-    for (const boldedRow of $("tr[bold]")) {
-        boldedRow.removeAttribute("bold");
+    for (const boldedRow of flightsBoldedRows()) {
+        boldedRowFlightId = boldedRow.firstChild.textContent;
+        flightUnbold(boldedRowFlightId);
     }
 
-    row.setAttribute("bold", "");
-    UpdateFlightInfo(flightId);
+    flightBold(flightId);
 }
 
 
 // handle dropped files.
 function flightsDropHandler(ev) {
     ev = ev.originalEvent;
+    dragEventCounter = 0;
     // Prevent default behavior (Prevent file from being opened)
     ev.preventDefault();
     for (const file of ev.dataTransfer.files) {
@@ -203,18 +203,54 @@ function flightsDropHandler(ev) {
     }
 }
 
-// prevent file from being opened
-function flightsDragOverHandler(ev) {
-    // Prevent default behavior (Prevent file from being opened)
-    ev.preventDefault();
-    console.log("a");
+// handle file dragging over flights tables.
+function flightsDragHandler(ev) {
+    $(".flights *").css("pointer-events", "none");
+    dragEventCounter++;
+    $(".internal").hide();
+    $(".external").hide();
+    $(".drop_box").show();
 }
 
-// prevent file from being opened
+// handle file dragging over flights tables end.
 function flightsDragEndHandler(ev) {
-    // Prevent default behavior (Prevent file from being opened)
-    ev.preventDefault();
-    console.log("b");
+    dragEventCounter--;
+    if (dragEventCounter === 0) {
+        $(".drop_box").hide();
+        $(".internal").show();
+        $(".external").show();
+        $(".flights *").css("pointer-events", "");
+    }
+}
+
+// bold the flight with id 'flightId'.
+function flightBold(flightId) {
+    $("#" + flightId).attr("bold", "");
+    UpdateFlightInfo(flightId);
+}
+
+// unbold the flight with id 'flightId'.
+function flightUnbold(flightId) {
+    if (!flightIsBold(flightId)) {
+        return;
+    }
+
+    $("#" + flightId).removeAttr("bold");
+    EmptyFlightInfo();
+}
+
+// return true if the flight with id 'flightId' is bold.
+function flightIsBold(flightId) {
+    if ($("#" + flightId + "[bold]").length) {
+        return true;
+    }
+
+    return false;
+}
+
+// return the bolded rows.
+function flightsBoldedRows() {
+    return $("tr[bold]");
 }
 
 // return true if the text is in json format, false otherwise.

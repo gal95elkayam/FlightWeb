@@ -84,9 +84,6 @@ th {
     grid-area: map;
 }
 
-.flights * {
-    pointer-events: none;
-}
 
 .flights {
     height: 100%;
