@@ -68,6 +68,8 @@ function UpdateFlightsTables() {
                         const flightSource = flight.isExternal ? "external" : "internal";
                         $("#" + flightSource + "FlightsTable tbody").append(FlightToTableRowHTML(flight));
                     }
+
+                    // gal draw route
                 }
 
                 // remove deleted flights from tables
@@ -80,6 +82,8 @@ function UpdateFlightsTables() {
 
                         // remove the flight from table
                         $("#" + flightId).remove();
+
+                        // gal delete route
                     }
                 }
 
@@ -239,6 +243,8 @@ function flightsDragEndHandler(ev) {
 function flightBold(flightId) {
     $("#" + flightId).attr("bold", "");
     UpdateFlightInfo(flightId);
+
+    // gal bold route
 }
 
 // unbold the flight with id 'flightId'.
@@ -249,6 +255,8 @@ function flightUnbold(flightId) {
 
     $("#" + flightId).removeAttr("bold");
     EmptyFlightInfo();
+
+    // gal unbold route
 }
 
 // return true if the flight with id 'flightId' is bold.

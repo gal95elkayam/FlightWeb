@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightManager : IFlightManager
+    public class FlightManager
     {
 
         public List<Flight> flights = new List<Flight>()
@@ -82,11 +82,18 @@ namespace FlightControlWeb.Models
         { 
             List<Server> externalServers = await _context.Servers.ToListAsync();
             List<Flight> resList = new List<Flight>();
+            // get all flight from server s
             foreach (Server s in externalServers)
             {
+                // if there is exist server with those flights- delete them
+                if (_context.serverToFlights.Find(s.ServerId) != null)
+                {
+                    _context.serverToFlights.Remove(_context.serverToFlights.Find(s.ServerId));
+                }
+                
                 string url = s.ServerURL;
                 url = string.Concat(url, "/api/Flights?relative_to=");
-                //IEnumerable<string> list = new List<string>() { relativeDate.Year.ToString() , "-", relativeDate.Month.ToString(), "-", relativeDate.Day.ToString(), "T", };
+               
                 IEnumerable<string> list = new List<string>(){url,relativeDate.Year.ToString(), "-", toTwoCharString(relativeDate.Month.ToString()),
                     "-", toTwoCharString(relativeDate.Day.ToString()), "T",
                         toTwoCharString(relativeDate.Hour.ToString()), ":", toTwoCharString(relativeDate.Minute.ToString()) , ":", toTwoCharString(relativeDate.Second.ToString()), "Z"};
@@ -104,13 +111,14 @@ namespace FlightControlWeb.Models
                     strRes = sr.ReadToEnd();
                     sr.Close();
                 }
-                //string check = strRes.Substring(2, strRes.Length - 3);
-                //string check1 = strRes.Substring(1, strRes.Length - 2);
-                //Console.WriteLine(check1);
                 listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
                 foreach (Flight f in listOfFlights)
                 {
                     f.is_external = true;
+                    // insert the flight to the map between 
+                    ExternalFlights ef = new ExternalFlights();
+                    ef.serverId = s.ServerId;
+                    ef.flightId = f.flight_id;
                 }
                 resList.AddRange(listOfFlights);
             }
@@ -244,7 +252,8 @@ namespace FlightControlWeb.Models
             throw new NotImplementedException();
         }
 
-        public void UpdateFlight(object key)
+        public void 
+            Flight(object key)
         {
             throw new NotImplementedException();
         }

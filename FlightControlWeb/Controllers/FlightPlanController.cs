@@ -10,6 +10,9 @@ using FlightControlWeb.Models;
 using Microsoft.AspNetCore.Routing.Constraints;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace FlightControlWeb.Controllers
 {
@@ -32,7 +35,7 @@ namespace FlightControlWeb.Controllers
             List<FlightPlan> list = await _context.FlightPlan.ToListAsync();
             // insert all the location's data and segments's data
             foreach (FlightPlan flight in list)
-            {  
+            {
                 string tempId = flight.id;
                 List<Location> locationsList = await _context.Locations.ToListAsync();
                 List<Segment> segmentsList = await _context.Segments.ToListAsync();
@@ -50,7 +53,7 @@ namespace FlightControlWeb.Controllers
         bool beginWith(string a, string begining)
         {
             string beg = a.Substring(0, 6);
-            if (string.Compare(a.Substring(0,6), begining) == 0 )
+            if (string.Compare(a.Substring(0, 6), begining) == 0)
             {
                 return true;
             } else
@@ -59,30 +62,62 @@ namespace FlightControlWeb.Controllers
             }
         }
 
+        FlightPlan getFromExternalServer(string serverId, string flightId)
+        {
+            string url = serverId;
+            url = string.Concat(url, "/api/FlightPlan");
+            url = string.Concat(flightId);
+            string urlPath = string.Format(url);
+            WebRequest requestObjGet = WebRequest.Create(urlPath);
+            requestObjGet.Method = "GET";
+            HttpWebResponse responseObjGet = null;
+            responseObjGet = (HttpWebResponse)requestObjGet.GetResponse();
+            string strRes = null;
+            FlightPlan flightPlan = null;
+            using (Stream stream = responseObjGet.GetResponseStream())
+            {
+                StreamReader sr = new StreamReader(stream);
+                strRes = sr.ReadToEnd();
+                sr.Close();
+            }
+            flightPlan = JsonConvert.DeserializeObject<FlightPlan>(strRes);
+            return flightPlan;
+        }
+
+
         // GET: api/FlightPlan/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FlightPlan>> GetFlightPlan(string id)
         {
+            // check if this is id of internal flight
             var flightPlan = await _context.FlightPlan.FindAsync(id);
 
+            // the id doesnt exist or this is id of external flight
             if (flightPlan == null)
             {
+                // check if this is id of external flight
+                List<ExternalFlights> externalFlights = await _context.serverToFlights.ToListAsync();
+                // if the id exist in external server - ask the eternal server
+                ExternalFlights ef = _context.serverToFlights.Find(id);
+                if (ef != null)
+                {
+                    return getFromExternalServer(ef.serverId, ef.flightId);
+                }
                 return NotFound();
             }
+            else
+            {
+                string tempId = flightPlan.id;
+                List<Location> locationsList = await _context.Locations.ToListAsync();
+                List<Segment> segmentsList = await _context.Segments.ToListAsync();
+                //get the location and the segments according to the id
+                Location thisLocation = locationsList.Where(a => a.id == tempId).First();
+                List<Segment> thisSegments = segmentsList.Where(a => beginWith(a.id, tempId) == true).ToList();
 
-            string tempId = flightPlan.id;
-            List<Location> locationsList = await _context.Locations.ToListAsync();
-            List<Segment> segmentsList = await _context.Segments.ToListAsync();
-            //get the location and the segments according to the id
-            Location thisLocation = locationsList.Where(a => a.id == tempId).First();        
-            List <Segment> thisSegments = segmentsList.Where(a => beginWith(a.id,tempId) == true).ToList();
-
-            flightPlan.Segments = thisSegments;
-            flightPlan.Initial_location = thisLocation;
-
-
-
-            return flightPlan;
+                flightPlan.Segments = thisSegments;
+                flightPlan.Initial_location = thisLocation;
+                return flightPlan;
+            }
         }
 
         // PUT: api/FlightPlan/5
@@ -141,7 +176,7 @@ namespace FlightControlWeb.Controllers
         [HttpPost]
         public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
-            flightPlan.is_external = false; // change it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            flightPlan.is_external = false; 
             flightPlan.id = createRandomId();
             //int tempId = Int32.Parse(Id);   
             var segmentList = flightPlan.Segments;
