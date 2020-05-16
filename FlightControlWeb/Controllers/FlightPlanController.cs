@@ -62,11 +62,12 @@ namespace FlightControlWeb.Controllers
             }
         }
 
-        FlightPlan getFromExternalServer(string serverId, string flightId)
+        FlightPlan getFromExternalServer(string serverUrl, string flightId)
         {
-            string url = serverId;
+            string url = serverUrl;
             url = string.Concat(url, "/api/FlightPlan");
-            url = string.Concat(flightId);
+            url = string.Concat(url, "/");
+            url = string.Concat(url, flightId);
             string urlPath = string.Format(url);
             WebRequest requestObjGet = WebRequest.Create(urlPath);
             requestObjGet.Method = "GET";
@@ -81,6 +82,7 @@ namespace FlightControlWeb.Controllers
                 sr.Close();
             }
             flightPlan = JsonConvert.DeserializeObject<FlightPlan>(strRes);
+            flightPlan.is_external = true;
             return flightPlan;
         }
 
@@ -96,12 +98,12 @@ namespace FlightControlWeb.Controllers
             if (flightPlan == null)
             {
                 // check if this is id of external flight
-                List<ExternalFlights> externalFlights = await _context.serverToFlights.ToListAsync();
+                List<ExternalFlights> externalFlights = await _context.flightToServer.ToListAsync();
                 // if the id exist in external server - ask the eternal server
-                ExternalFlights ef = _context.serverToFlights.Find(id);
+                ExternalFlights ef = _context.flightToServer.Find(id);
                 if (ef != null)
                 {
-                    return getFromExternalServer(ef.serverId, ef.flightId);
+                    return getFromExternalServer(ef.serverUrl, ef.flightId);
                 }
                 return NotFound();
             }

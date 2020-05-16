@@ -86,9 +86,9 @@ namespace FlightControlWeb.Models
             foreach (Server s in externalServers)
             {
                 // if there is exist server with those flights- delete them
-                if (_context.serverToFlights.Find(s.ServerId) != null)
+                if (_context.flightToServer.Find(s.ServerId) != null)
                 {
-                    _context.serverToFlights.Remove(_context.serverToFlights.Find(s.ServerId));
+                    _context.flightToServer.Remove(_context.flightToServer.Find(s.ServerId));
                 }
                 
                 string url = s.ServerURL;
@@ -118,7 +118,10 @@ namespace FlightControlWeb.Models
                     // insert the flight to the map between 
                     ExternalFlights ef = new ExternalFlights();
                     ef.serverId = s.ServerId;
+                    ef.serverUrl = s.ServerURL;
                     ef.flightId = f.flight_id;
+                    _context.flightToServer.Add(ef);
+                    await _context.SaveChangesAsync();
                 }
                 resList.AddRange(listOfFlights);
             }
