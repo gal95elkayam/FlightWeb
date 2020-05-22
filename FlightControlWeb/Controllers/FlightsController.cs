@@ -78,7 +78,7 @@ namespace FlightControlWeb.Controllers
         {
             if (relative_to == null)
             {
-                return flightManager.flights ; /////cange it to notFount() !!!!!!!! just for tests
+                return flightManager.flights ; ////////cange it to notFount() !!!!!!!! just for tests
             }
             string urlRequest = Request.QueryString.Value;
             DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0,20)));
