@@ -87,7 +87,12 @@ namespace FlightControlWeb.Controllers
             var resultList = new List<Flight>();
             foreach (FlightPlan flightPlan in flightsList)
             {
-                resultList.Add(await flightManager.fromInternal(relativeDate, flightPlan, _context));     
+                Flight toAdd = await flightManager.fromInternal(relativeDate, flightPlan, _context);
+                if (toAdd != null)
+                {
+                    resultList.Add(toAdd);
+                }
+                  
             }
             if (urlRequest.Contains("&sync_all"))
             {
