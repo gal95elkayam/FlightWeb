@@ -49,7 +49,7 @@ th {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
     gap: 1px 1px;
-    grid-template-areas: "flight_id flight_id ." "lon passengers date_time" "lat company is_external";
+    grid-template-areas: "flight_id flight_id ." "start_location start_time company" "end_location end_time passengers";
     grid-area: info;
 }
 
@@ -57,28 +57,28 @@ th {
     grid-area: flight_id;
 }
 
-.lon {
-    grid-area: lon;
+.start_location {
+    grid-area: start_location;
 }
 
-.lat {
-    grid-area: lat;
+.end_location {
+    grid-area: end_location;
 }
 
-.passengers {
-    grid-area: passengers;
+.start_time {
+    grid-area: start_time;
+}
+
+.end_time {
+    grid-area: end_time;
 }
 
 .company {
     grid-area: company;
 }
 
-.date_time {
-    grid-area: date_time;
-}
-
-.is_external {
-    grid-area: is_external;
+.passengers {
+    grid-area: passengers;
 }
 
 .map {
@@ -86,6 +86,8 @@ th {
 }
 
 .flights {
+    height: 100%;
+    width: 100%;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr;
@@ -94,6 +96,10 @@ th {
     overflow: auto;
     grid-area: flights;
 }
+
+    .flights td {
+        cursor: pointer;
+    }
 
 .internal {
     height: 100%;
@@ -124,4 +130,18 @@ th {
     border: 5px solid blue;
     width: 200px;
     height: 100px;
+}
+
+tr[bold] {
+    font-weight: bold;
+}
+
+.drop_box {
+    height: 200%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 3px dashed rgb(0, 0, 0);
 }
