@@ -96,9 +96,9 @@ namespace FlightControlWeb.Controllers
             if (flightPlan == null)
             {
                 // check if this is id of external flight
-                List<ExternalFlights> externalFlights = await _context.serverToFlights.ToListAsync();
+                List<ExternalFlights> externalFlights = await _context.flightToServer.ToListAsync();
                 // if the id exist in external server - ask the eternal server
-                ExternalFlights ef = _context.serverToFlights.Find(id);
+                ExternalFlights ef = _context.flightToServer.Find(id);
                 if (ef != null)
                 {
                     return getFromExternalServer(ef.serverId, ef.flightId);

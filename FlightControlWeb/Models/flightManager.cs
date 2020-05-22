@@ -15,7 +15,7 @@ namespace FlightControlWeb.Models
 
         public List<Flight> flights = new List<Flight>()
         {
-            
+
             new Flight { flight_id ="216" , longitude=33.244, latitude=31.12, passengers=216, company_name=  "SwissAir", date_time= "2021-12-26T20:56:21Z",is_external=false },
             new Flight { flight_id ="217" , longitude=95.244, latitude=37.12, passengers=217, company_name=  "galsAir", date_time= "2024-12-26T23:56:21Z",is_external=false },
             new Flight { flight_id ="218" , longitude=73.244, latitude=98.12, passengers=216, company_name=  "SgggsAir", date_time= "2027-12-26T23:56:21Z",is_external=false }
@@ -79,21 +79,21 @@ namespace FlightControlWeb.Models
         }
 
         public async Task<List<Flight>> fromExternal(DateTime relativeDate, DBContext _context)
-        { 
+        {
             List<Server> externalServers = await _context.Servers.ToListAsync();
             List<Flight> resList = new List<Flight>();
             // get all flight from server s
             foreach (Server s in externalServers)
             {
                 // if there is exist server with those flights- delete them
-                if (_context.serverToFlights.Find(s.ServerId) != null)
+                if (_context.flightToServer.Find(s.ServerId) != null)
                 {
-                    _context.serverToFlights.Remove(_context.serverToFlights.Find(s.ServerId));
+                    _context.flightToServer.Remove(_context.flightToServer.Find(s.ServerId));
                 }
-                
+
                 string url = s.ServerURL;
                 url = string.Concat(url, "/api/Flights?relative_to=");
-               
+
                 IEnumerable<string> list = new List<string>(){url,relativeDate.Year.ToString(), "-", toTwoCharString(relativeDate.Month.ToString()),
                     "-", toTwoCharString(relativeDate.Day.ToString()), "T",
                         toTwoCharString(relativeDate.Hour.ToString()), ":", toTwoCharString(relativeDate.Minute.ToString()) , ":", toTwoCharString(relativeDate.Second.ToString()), "Z"};
@@ -119,6 +119,8 @@ namespace FlightControlWeb.Models
                     ExternalFlights ef = new ExternalFlights();
                     ef.serverId = s.ServerId;
                     ef.flightId = f.flight_id;
+                    _context.flightToServer.Add(ef);
+                    await _context.SaveChangesAsync();
                 }
                 resList.AddRange(listOfFlights);
             }
@@ -165,7 +167,7 @@ namespace FlightControlWeb.Models
             List<Segment> segment = await context.Segments.ToListAsync();
             foreach (Segment s in segment)
             {
-                if (beginWith(s.id,flightPlan.id))
+                if (beginWith(s.id, flightPlan.id))
                 {
                     time += s.timespan_seconds;
                 }
@@ -182,7 +184,7 @@ namespace FlightControlWeb.Models
             DateTime end = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(getInitialLocation(flightPlan, context).date_time));
             foreach (Segment s in segment)
             {
-                if (beginWith(s.id,flightPlan.id))
+                if (beginWith(s.id, flightPlan.id))
                 {
                     begin = end;
                     end = begin.AddSeconds(s.timespan_seconds);
@@ -195,7 +197,7 @@ namespace FlightControlWeb.Models
                     if (beginCompRel <= 0 && endCompRel <= 0)
                     {
                         double relativeTimePassed = (relativeDate - begin).TotalSeconds / (end - begin).TotalSeconds;
-                        flightFromPlan.longitude = longBegin + relativeTimePassed*(s.Longitude - longBegin);
+                        flightFromPlan.longitude = longBegin + relativeTimePassed * (s.Longitude - longBegin);
                         flightFromPlan.latitude = latBegin + relativeTimePassed * (s.Latitude - latBegin);
                         break;
                     }
@@ -203,7 +205,7 @@ namespace FlightControlWeb.Models
                 longBegin = s.Longitude;
                 latBegin = s.Latitude;
             }
-           
+
         }
 
 
@@ -219,7 +221,7 @@ namespace FlightControlWeb.Models
             return flightFromPlan;
         }
 
-     
+
 
         public void AddFlight(FlightPlan flightplan)
         {
@@ -252,7 +254,7 @@ namespace FlightControlWeb.Models
             throw new NotImplementedException();
         }
 
-        public void 
+        public void
             Flight(object key)
         {
             throw new NotImplementedException();
