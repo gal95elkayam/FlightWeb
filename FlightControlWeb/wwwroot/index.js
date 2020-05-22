@@ -40,19 +40,7 @@ function initMap() {
 
 // get flights from database and update the flights tables.
 function UpdateFlightsTables() {
-    const curUrl = new URL(window.location);
-    const relative = curUrl.searchParams.get("relative_to");
-    const sync = curUrl.searchParams.get("sync");
-    const url = "/api/Flights?relative_to=" + relative + (sync ? "&sync=" + sync : "");
-
-    if (!relative) {
-        relativeErrorCounter++;
-        if (relativeErrorCounter >= relativeErrorCounterMax) {
-            alert("please add relative_to parameter");
-            relativeErrorCounter = 0;
-        }
-        return;
-    }
+    const url = "/api/Flights?relative_to=" + new Date().toISOString().split('.')[0] + "Z" + "&sync_all";
 
     $.ajax({
         url: url,
@@ -62,6 +50,10 @@ function UpdateFlightsTables() {
 
                 // insert new flights to tables
                 for (const flight of flights) {
+                    if (flight == null) {
+                        continue;
+                    }
+
                     newFlightsId.push(flight.flight_id);
                     const a = $("#" + flight.flight_id);
                     if (!$("#" + flight.flight_id).length) {
