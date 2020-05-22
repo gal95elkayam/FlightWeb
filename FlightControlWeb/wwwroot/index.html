@@ -33,19 +33,19 @@
 </head>
 <body>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiRsf3V8b8bfumUKxSNtQylXqSSNMPwy8&callback=initMap"
-            async defer></script>
+            defer></script>
 
     <div class="grid-container">
         <div class="map_info">
             <div class="map mr-1" id="map"></div>
             <div class="info">
                 <div class="flight_id"><h3>Flight <span id="flight_info_id"></span></h3></div>
-                <div class="lon">Longitude: <span id="flight_info_lon"></span></div>
-                <div class="lat">Latitude: <span id="flight_info_lat"></span></div>
-                <div class="passengers">Passengers: <span id="flight_info_pas"></span></div>
-                <div class="company">Company Name: <span id="flight_info_com"></span></div>
-                <div class="date_time">Date Time: <span id="flight_info_time"></span></div>
-                <div class="is_external">Is External: <span id="flight_info_ext"></span></div>
+                <div class="start_location">Start Location: <span id="flight_info_start_loc"></span></div>
+                <div class="end_location">End Location: <span id="flight_info_end_loc"></span></div>
+                <div class="start_time">Start Time: <span id="flight_info_start_time"></span></div>
+                <div class="end_time">End Time: <span id="flight_info_end_time"></span></div>
+                <div class="company">Company: <span id="flight_info_company"></span></div>
+                <div class="passengers">Passengers: <span id="flight_info_passengers"></span></div>
             </div>
         </div>
         <div class="flights">
@@ -57,7 +57,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Company Name</th>
-                            <th>Passengers</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,7 +70,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Company Name</th>
-                            <th>Passengers</th>
                         </tr>
                     </thead>
                     <tbody>
