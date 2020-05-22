@@ -40,7 +40,7 @@ function initMap() {
 
 // get flights from database and update the flights tables.
 function UpdateFlightsTables() {
-    const url = "/api/Flightplan";//?relative_to=" + new Date().toISOString().split('.')[0] + "Z" + "&sync_all";
+    const url = "/api/Flights?relative_to=" + new Date().toISOString().split('.')[0] + "Z" + "&sync_all";
 
     $.ajax({
         url: url,
