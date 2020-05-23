@@ -50,6 +50,13 @@ function updateFlightsTables() {
         url: url,
         success:
             function (flights) {
+
+                //delete all markers in the map
+                for (i = 0; i < allMarker.length; i++) {
+                    allMarker[i].setMap(null);
+                }
+                allMarker = [];
+
                 let newFlightsId = [];
 
                 // insert new flights to tables
@@ -79,25 +86,26 @@ function updateFlightsTables() {
 
                         // remove the flight from table
                         $("#" + flightId).remove();
-                    }
 
-                    // delete route
-                    for (let [key, value] of flightPaths.entries()) {
-                        if (key == flightId) {
-                            value.setMap(null);
-                            flightPaths.delete(key)
+                        emptyFlightInfo()
+                        // delete route
+                        for (let [key, value] of flightPaths.entries()) {
+                            if (key == flightId) {
+                                value.setMap(null);
+                                flightPaths.delete(key)
+                            }
                         }
-                    }
 
-                    //remove marker on the map
-                    for (const i = 0; i < allMarker.length; i++) {
-                        if (allMarker[i].get('store_id') == flightId) {
-                            allMarker[i].setMap(null);
-                            //remove from array
-                            allMarker.splice(i, 1);
-                            //remove from array color
-                            const index = array.indexOf(flightId);
-                            markersColor.splice(index, 1);
+                        //remove marker on the map
+                        for (const i = 0; i < allMarker.length; i++) {
+                            if (allMarker[i].get('store_id') == flightId) {
+                                allMarker[i].setMap(null);
+                                //remove from array
+                                allMarker.splice(i, 1);
+                                //remove from array color
+                                const index = array.indexOf(flightId);
+                                markersColor.splice(index, 1);
+                            }
                         }
                     }
                 }
@@ -179,12 +187,13 @@ function updateFlightInfo(flightId) {
 
 function emptyFlightInfo() {
     $("#flight_info_id").empty();
-    $("#flight_info_lon").empty();
-    $("#flight_info_lat").empty();
-    $("#flight_info_pas").empty();
-    $("#flight_info_com").empty();
+    $("#flight_info_start_loc").empty();
+    $("#flight_info_end_loc").empty();
+    $("#flight_info_start_time").empty();
+    $("#flight_info_end_time").empty();
     $("#flight_info_time").empty();
-    $("#flight_info_ext").empty();
+    $("#flight_info_passengers").empty();
+    $("#flight_info_company").empty();
 }
 
 // handle click on the delete button - delete the chosen flight.
@@ -283,6 +292,11 @@ function flightUnbold(flightId) {
 
     $("#" + flightId).removeAttr("bold");
     emptyFlightInfo();
+    //delete all route 
+    for (let [key, value] of flightPaths.entries()) {
+        value.setMap(null);
+    }
+
 }
 
 // return true if the flight with id 'flightId' is bold.
@@ -353,9 +367,14 @@ function addMarker(myLatLng, data) {
             infoWindow.open(map, marker);
             updateFlightInfo(data.flight_id)
             polyline(data, map, data.flight_id)
+            flightBoldMap(data.flight_id)
         });
         //Attach click event to the map.
         google.maps.event.addDomListenerOnce(map, "click", function (e) {
+            // deleting bolded row?
+            if (flightIsBold(data.flight_id)) {
+                flightUnbold(data.flight_id)
+            }
             marker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
             markersColor.pop(data.flight_id);
             if (infoWindow) infoWindow.close();
@@ -366,10 +385,25 @@ function addMarker(myLatLng, data) {
                 }
             }
 
+
         });
 
     })(marker, data);
 
+}
+// bold the flight with id 'flightId'.
+function flightBoldMap(flightId) {
+    if (flightIsBold(flightId)) {
+        return;
+    }
+
+    for (const boldedRow of flightsBoldedRows()) {
+        const boldedRowFlightId = boldedRow.firstChild.textContent;
+        flightUnbold(boldedRowFlightId);
+    }
+
+    $("#" + flightId).attr("bold", "");
+    updateFlightInfo(flightId);
 }
 function polyline(item, map, flight_id) {
     let myMap = new Map()

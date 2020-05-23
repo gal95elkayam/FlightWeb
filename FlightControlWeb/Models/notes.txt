@@ -1,7 +1,7 @@
 ﻿
 
 test yuval:
-1. more than 10 segments
+1. check external!!
 
 4. push with launch 44355!!
 

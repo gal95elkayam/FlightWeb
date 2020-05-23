@@ -90,7 +90,6 @@ namespace FlightControlWeb.Models
                 {
                     _context.flightToServer.Remove(_context.flightToServer.Find(s.ServerId));
                 }
-                
                 string url = s.ServerURL;
                 url = string.Concat(url, "/api/Flights?relative_to=");
                
@@ -120,34 +119,21 @@ namespace FlightControlWeb.Models
                     ef.serverId = s.ServerId;
                     ef.serverUrl = s.ServerURL;
                     ef.flightId = f.flight_id;
+                    if (_context.flightToServer.Find(ef.serverId) != null)
+                    {
+                        _context.flightToServer.Remove(_context.flightToServer.Find(ef.serverId));
+                    }
                     _context.flightToServer.Add(ef);
-                    await _context.SaveChangesAsync();
+                    Console.WriteLine("124\n");
+                    _ = _context.SaveChangesAsync();
+                    Console.WriteLine("126\n");
                 }
                 resList.AddRange(listOfFlights);
             }
             return resList;
         }
 
-        //public async Task<Flight> FromInternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
-        //{
-        //    if(flightPlan.is_external == false && await checkIfCurrAsync(relativeDate, flightPlan, _context))
-        //    {
-        //        Flight flightToInsert = planToFlight(flightPlan, _context, relativeDate);
-        //        return flightToInsert;
-        //    }
-        //    return null;
-        //}
-
-        //public async Task<Flight> FromInternalAndExternal(DateTime relativeDate, FlightPlan flightPlan, DBContext _context)
-        //{
-        //    if (await checkIfCurrAsync(relativeDate, flightPlan, _context))
-        //    {
-        //        Flight flightToInsert = planToFlight(flightPlan, _context, relativeDate);
-        //        return flightToInsert;
-        //    }
-        //    return null;
-        //}
-
+       
 
         bool beginWith(string a, string begining)
         {
