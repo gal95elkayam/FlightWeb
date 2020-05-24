@@ -1,4 +1,4 @@
-﻿/* Always set the map height explicitly to define the size of the div
+﻿ /* Always set the map height explicitly to define the size of the div
         * element that contains the map. */
 #map {
     height: 100%;
@@ -144,4 +144,8 @@ tr[bold] {
     align-items: center;
     text-align: center;
     border: 3px dashed rgb(0, 0, 0);
+}
+
+.gm-ui-hover-effect {
+    display: none !important;
 }
