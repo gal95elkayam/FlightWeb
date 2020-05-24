@@ -1,4 +1,4 @@
-const updateDelay = 3000;
+const updateDelay = 1000;
 let flightsId = [];
 let dragEventCounter = 0;
 let map
@@ -67,7 +67,7 @@ function updateFlightsTables() {
 
                     newFlightsId.push(flight.flight_id);
                     if (!$("#" + flight.flight_id).length) {
-                        const flightSource = flight.isExternal ? "external" : "internal";
+                        const flightSource = flight.is_external ? "external" : "internal";
                         $("#" + flightSource + "FlightsTable tbody").append(flightToTableRowHTML(flight));
                     }
 
@@ -87,7 +87,7 @@ function updateFlightsTables() {
                         // remove the flight from table
                         $("#" + flightId).remove();
 
-                        emptyFlightInfo()
+
                         // delete route
                         for (let [key, value] of flightPaths.entries()) {
                             if (key == flightId) {
@@ -146,7 +146,7 @@ function flightToTableRowHTML(flight) {
     cols += '<td informative>' + flight.flight_id + '</td>';
     cols += '<td informative>' + flight.company_name + '</td>';
 
-    if (!flight.isExternal) {
+    if (!flight.is_external) {
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="X"></td>';
     }
 
@@ -355,10 +355,17 @@ function addMarker(myLatLng, data) {
     //Attach click event to the marker.
     (function (marker, data) {
         google.maps.event.addListener(marker, "click", function (e) {
+            if (infoWindow) infoWindow.close();
             //delete all route 
             for (let [key, value] of flightPaths.entries()) {
                 value.setMap(null);
             }
+            //reset all the markers and there color
+            for (i = 0; i < allMarker.length; i++) {
+                allMarker[i].setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+
+            }
+            markersColor = [];
             //Change the marker icon
             marker.setIcon('https://www.google.com/mapfiles/marker_green.png');
             markersColor.push(data.flight_id);
@@ -465,6 +472,16 @@ function updateMarker(flightId) {
         url: url,
         contentType: "application/json",
         success: function (flight) {
+            //reset all the markers and there color
+            for (i = 0; i < allMarker.length; i++) {
+                allMarker[i].setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+                infoWindow.close();
+            }
+            markersColor = [];
+            //delete all route 
+            for (let [key, value] of flightPaths.entries()) {
+                value.setMap(null);
+            }
             contentString = "Flight ID:" + flightId + "</br>Company Name:" + flight.company_name;
             for (i = 0; i < allMarker.length; i++) {
                 if (allMarker[i].get('store_id') == flightId) {
@@ -475,6 +492,7 @@ function updateMarker(flightId) {
                     infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + contentString + "</div>");
                     infoWindow.open(map, allMarker[i]);
                     polyline(flight, map, flightId)
+                    updateFlightInfo(data.flight_id)
                 }
             }
 

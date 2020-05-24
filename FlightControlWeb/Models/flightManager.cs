@@ -77,6 +77,16 @@ namespace FlightControlWeb.Models
             }
             return toString;
         }
+        
+        private int calcNumOfFlights(string strRes)
+        {
+            if (!strRes.Contains("\"is_external\":false}"))
+            {
+                return 0;
+            }
+            string[] flights = strRes.Split("\"is_external\":false},");
+            return flights.Length;
+        }
 
         public async Task<List<Flight>> fromExternal(DateTime relativeDate, DBContext _context)
         { 
@@ -85,11 +95,7 @@ namespace FlightControlWeb.Models
             // get all flight from server s
             foreach (Server s in externalServers)
             {
-                // if there is exist server with those flights- delete them
-                if (_context.flightToServer.Find(s.ServerId) != null)
-                {
-                    _context.flightToServer.Remove(_context.flightToServer.Find(s.ServerId));
-                }
+
                 string url = s.ServerURL;
                 url = string.Concat(url, "/api/Flights?relative_to=");
                
@@ -103,14 +109,27 @@ namespace FlightControlWeb.Models
                 HttpWebResponse responseObjGet = null;
                 responseObjGet = (HttpWebResponse)requestObjGet.GetResponse();
                 string strRes = null;
-                List<Flight> listOfFlights = null;
+                //var listOfFlights;
                 using (Stream stream = responseObjGet.GetResponseStream())
                 {
                     StreamReader sr = new StreamReader(stream);
                     strRes = sr.ReadToEnd();
+                    Console.WriteLine(strRes);
                     sr.Close();
                 }
+                int numOfFlights = calcNumOfFlights(strRes);
+                List<Flight> listOfFlights = new List<Flight>();
                 listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
+
+                //if (numOfFlights >1)
+                //{
+                //    listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
+                //} if (numOfFlights == 1)
+                //{
+                //    listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
+                //    //Flight f = JsonConvert.DeserializeObject<Flight>(strRes);
+                //    //listOfFlights.Add(f);
+                //}
                 foreach (Flight f in listOfFlights)
                 {
                     f.is_external = true;
@@ -119,15 +138,18 @@ namespace FlightControlWeb.Models
                     ef.serverId = s.ServerId;
                     ef.serverUrl = s.ServerURL;
                     ef.flightId = f.flight_id;
-                    if (_context.flightToServer.Find(ef.serverId) != null)
+                    if (_context.flightToServer.Find(ef.flightId) != null)
                     {
-                        _context.flightToServer.Remove(_context.flightToServer.Find(ef.serverId));
+                        _context.flightToServer.Remove(_context.flightToServer.Find(ef.flightId));
+                        //_ = _context.SaveChangesAsync();
                     }
+                    Console.WriteLine("145\n");
                     _context.flightToServer.Add(ef);
                     Console.WriteLine("124\n");
                     _ = _context.SaveChangesAsync();
                     Console.WriteLine("126\n");
                 }
+                
                 resList.AddRange(listOfFlights);
             }
             return resList;

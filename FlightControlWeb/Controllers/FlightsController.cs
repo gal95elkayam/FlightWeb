@@ -83,8 +83,8 @@ namespace FlightControlWeb.Controllers
             string urlRequest = Request.QueryString.Value;
             DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0,20)));
             List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
-            
-            var resultList = new List<Flight>();
+
+            List<Flight> resultList = new List<Flight>();
             foreach (FlightPlan flightPlan in flightsList)
             {
                 Flight toAdd = await flightManager.fromInternal(relativeDate, flightPlan, _context);
@@ -97,10 +97,15 @@ namespace FlightControlWeb.Controllers
             if (urlRequest.Contains("&sync_all"))
             {
                 var fromExt = await flightManager.fromExternal(relativeDate, _context);
+                Console.WriteLine(fromExt);
                 foreach (Flight f in fromExt)
                 {
                     resultList.Add(f);
                 }
+            }
+            if (resultList == null)
+            {
+                Console.WriteLine("here\n");
             }
             return resultList;
         }
