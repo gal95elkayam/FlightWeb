@@ -97,15 +97,10 @@ namespace FlightControlWeb.Controllers
             if (urlRequest.Contains("&sync_all"))
             {
                 var fromExt = await flightManager.fromExternal(relativeDate, _context);
-                Console.WriteLine(fromExt);
                 foreach (Flight f in fromExt)
                 {
                     resultList.Add(f);
                 }
-            }
-            if (resultList == null)
-            {
-                Console.WriteLine("here\n");
             }
             return resultList;
         }

@@ -107,29 +107,35 @@ namespace FlightControlWeb.Models
                 WebRequest requestObjGet = WebRequest.Create(urlPath);
                 requestObjGet.Method = "GET";
                 HttpWebResponse responseObjGet = null;
-                responseObjGet = (HttpWebResponse)requestObjGet.GetResponse();
+                try
+                {
+                    responseObjGet = (HttpWebResponse)requestObjGet.GetResponse();
+                }
+                catch (System.Net.WebException)
+                {
+                    continue;
+                }
+
                 string strRes = null;
                 //var listOfFlights;
                 using (Stream stream = responseObjGet.GetResponseStream())
                 {
                     StreamReader sr = new StreamReader(stream);
                     strRes = sr.ReadToEnd();
-                    Console.WriteLine(strRes);
                     sr.Close();
                 }
                 int numOfFlights = calcNumOfFlights(strRes);
                 List<Flight> listOfFlights = new List<Flight>();
                 listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
-
-                //if (numOfFlights >1)
+                //try
                 //{
-                //    listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
-                //} if (numOfFlights == 1)
-                //{
-                //    listOfFlights = JsonConvert.DeserializeObject<List<Flight>>(strRes);
-                //    //Flight f = JsonConvert.DeserializeObject<Flight>(strRes);
-                //    //listOfFlights.Add(f);
+                    
                 //}
+                //catch (System.Net.WebException)
+                //{
+                //    continue;
+                //}
+
                 foreach (Flight f in listOfFlights)
                 {
                     f.is_external = true;
@@ -138,16 +144,12 @@ namespace FlightControlWeb.Models
                     ef.serverId = s.ServerId;
                     ef.serverUrl = s.ServerURL;
                     ef.flightId = f.flight_id;
-                    if (_context.flightToServer.Find(ef.flightId) != null)
+                    if (_context.flightToServer.Find(ef.flightId) == null)
                     {
-                        _context.flightToServer.Remove(_context.flightToServer.Find(ef.flightId));
-                        //_ = _context.SaveChangesAsync();
+                        _context.flightToServer.Add(ef);
+                        // _context.flightToServer.Remove(_context.flightToServer.Find(ef.flightId));
+                        _context.SaveChanges();
                     }
-                    Console.WriteLine("145\n");
-                    _context.flightToServer.Add(ef);
-                    Console.WriteLine("124\n");
-                    _ = _context.SaveChangesAsync();
-                    Console.WriteLine("126\n");
                 }
                 
                 resList.AddRange(listOfFlights);

@@ -86,8 +86,13 @@ function updateFlightsTables() {
 
                         // remove the flight from table
                         $("#" + flightId).remove();
+                       
+                        ////delete all route 
+                        //for (let [key, value] of flightPaths.entries()) {
+                        //    value.setMap(null);
+                        //}
 
-
+                    
                         // delete route
                         for (let [key, value] of flightPaths.entries()) {
                             if (key == flightId) {
@@ -95,9 +100,11 @@ function updateFlightsTables() {
                                 flightPaths.delete(key)
                             }
                         }
+                    
+                        
 
                         //remove marker on the map
-                        for (const i = 0; i < allMarker.length; i++) {
+                        for (let i = 0; i < allMarker.length; i++) {
                             if (allMarker[i].get('store_id') == flightId) {
                                 allMarker[i].setMap(null);
                                 //remove from array
@@ -121,21 +128,21 @@ function addNewFlightPlan(flightPlanText) {
     if (!isJson(flightPlanText)) {
         alert("the text is not in a json format");
     }
+    else {
+        const url = "/api/FlightPlan";
 
-    const url = "/api/FlightPlan";
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        contentType: "application/json",
-        data: flightPlanText,
-        success: function (data) {
-            alert("file uploaded successfuly");
-            updateFlightsTables();
-        },
-        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
-    });
-
+        $.ajax({
+            type: "POST",
+            url: url,
+            contentType: "application/json",
+            data: flightPlanText,
+            success: function (data) {
+                alert("file uploaded successfuly");
+                updateFlightsTables();
+            },
+            error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
+        });
+    }
 }
 
 // get a flight and return its html table row.
@@ -207,6 +214,7 @@ function deleteFlightClick() {
         flightUnbold(flightId);
     }
 
+
     $.ajax({
         type: "DELETE",
         url: url,
@@ -214,6 +222,7 @@ function deleteFlightClick() {
             function () {
                 rowToRemove.remove();
                 alert("flight " + flightId + " was deleted successfuly");
+               
             },
         error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
@@ -492,7 +501,7 @@ function updateMarker(flightId) {
                     infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + contentString + "</div>");
                     infoWindow.open(map, allMarker[i]);
                     polyline(flight, map, flightId)
-                    updateFlightInfo(data.flight_id)
+                    updateFlightInfo(flightId)
                 }
             }
 
