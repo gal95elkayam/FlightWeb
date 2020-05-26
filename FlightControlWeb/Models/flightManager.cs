@@ -228,7 +228,6 @@ namespace FlightControlWeb.Models
             flightFromPlan.passengers = flightPlan.passengers;
             flightFromPlan.company_name = flightPlan.company_name;
             flightFromPlan.date_time = getInitialLocation(flightPlan, context).date_time; // change to the time now?
-            //flightFromPlan.is_external = flightPlan.is_external;
             return flightFromPlan;
         }
 
