@@ -145,3 +145,7 @@ tr[bold] {
     text-align: center;
     border: 3px dashed rgb(0, 0, 0);
 }
+
+.gm-ui-hover-effect {
+    display: none !important;
+}
