@@ -56,7 +56,8 @@ namespace FlightControlWeb.Controllers
             if (string.Compare(a.Substring(0, 6), begining) == 0)
             {
                 return true;
-            } else
+            }
+            else
             {
                 return false;
             }
@@ -192,15 +193,15 @@ namespace FlightControlWeb.Controllers
         public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
             if (flightPlan.company_name == null || flightPlan.Segments == null || flightPlan.Initial_location == null
-                || flightPlan.passengers <= 0 || flightPlan.Initial_location.Latitude < -90 || flightPlan.Initial_location.Latitude >90
+                || flightPlan.passengers <= 0 || flightPlan.Initial_location.Latitude < -90 || flightPlan.Initial_location.Latitude > 90
                 || flightPlan.Initial_location.Longitude < -180 || flightPlan.Initial_location.Longitude > 180 ||
                 thereIsAInvaldSegment(flightPlan.Segments))
             {
-                Response.StatusCode = 500;  
+                Response.StatusCode = 500;
                 return Content("Invalid data");
                 //return BadRequest();
             }
-            flightPlan.is_external = false; 
+            flightPlan.is_external = false;
             flightPlan.id = createRandomId();
             //int tempId = Int32.Parse(Id);   
             var segmentList = flightPlan.Segments;
@@ -217,7 +218,7 @@ namespace FlightControlWeb.Controllers
             // insert the location to the DB of the locations.
             _context.FlightPlan.Add(flightPlan);
             await _context.SaveChangesAsync();
-           // tempId++;
+            // tempId++;
             //Id = tempId.ToString();
             return CreatedAtAction("GetFlightPlan", new { id = flightPlan.id }, flightPlan);
         }
