@@ -140,7 +140,10 @@ function addNewFlightPlan(flightPlanText) {
                 alert("file uploaded successfuly");
                 updateFlightsTables();
             },
-            error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
+            error: function (request) {
+                alert(request.responseText);
+            }
+           
         });
     }
 }

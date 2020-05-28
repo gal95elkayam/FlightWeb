@@ -74,7 +74,7 @@ namespace FlightControlWeb.Controllers
 
         [HttpGet]
         [Obsolete]
-        public async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
+        public virtual async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
         {
             if (relative_to == null)
             {

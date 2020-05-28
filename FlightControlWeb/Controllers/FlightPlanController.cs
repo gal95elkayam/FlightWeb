@@ -30,7 +30,7 @@ namespace FlightControlWeb.Controllers
 
         // GET: api/FlightPlan
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlan()
+        public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlan(object value)
         {
             List<FlightPlan> list = await _context.FlightPlan.ToListAsync();
             // insert all the location's data and segments's data
@@ -50,7 +50,7 @@ namespace FlightControlWeb.Controllers
 
         }
 
-        bool beginWith(string a, string begining)
+        public bool beginWith(string a, string begining)
         {
             string beg = a.Substring(0, 6);
             if (string.Compare(a.Substring(0, 6), begining) == 0)
@@ -62,7 +62,7 @@ namespace FlightControlWeb.Controllers
             }
         }
 
-        FlightPlan getFromExternalServer(string serverUrl, string flightId)
+        public FlightPlan getFromExternalServer(string serverUrl, string flightId)
         {
             string url = serverUrl;
             url = string.Concat(url, "/api/FlightPlan");
@@ -154,7 +154,7 @@ namespace FlightControlWeb.Controllers
             return NoContent();
         }
 
-        string createRandomId()
+        public string createRandomId()
         {
             var charsBig = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             var charsSmall = "abcdefghijklmnopqrstuvwxyz";
@@ -170,7 +170,20 @@ namespace FlightControlWeb.Controllers
             return new String(stringChars);
         }
 
+        private bool thereIsAInvaldSegment(List<Segment> segmentList)
+        {
+            foreach (Segment s in segmentList)
+            {
+                if (s.Longitude < -180 || s.Longitude > 180 || s.Latitude < -90 || s.Latitude > 90)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
+
+        //static string Id = "100000"; //change to another id!
         //static string Id = "100000"; //change to another id!
         // POST: api/FlightPlan
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
@@ -178,6 +191,15 @@ namespace FlightControlWeb.Controllers
         [HttpPost]
         public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
+            if (flightPlan.company_name == null || flightPlan.Segments == null || flightPlan.Initial_location == null
+                || flightPlan.passengers <= 0 || flightPlan.Initial_location.Latitude < -90 || flightPlan.Initial_location.Latitude >90
+                || flightPlan.Initial_location.Longitude < -180 || flightPlan.Initial_location.Longitude > 180 ||
+                thereIsAInvaldSegment(flightPlan.Segments))
+            {
+                Response.StatusCode = 500;  
+                return Content("Invalid data");
+                //return BadRequest();
+            }
             flightPlan.is_external = false; 
             flightPlan.id = createRandomId();
             //int tempId = Int32.Parse(Id);   
@@ -204,6 +226,7 @@ namespace FlightControlWeb.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<FlightPlan>> DeleteFlightPlan(string id)
         {
+            Console.WriteLine("in delete\n");
             var flightPlan = await _context.FlightPlan.FindAsync(id);
             if (flightPlan == null)
             {
