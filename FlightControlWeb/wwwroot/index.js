@@ -1,12 +1,12 @@
 const updateDelay = 1000;
 let flightsId = [];
 let dragEventCounter = 0;
-let map
+let map;
 let markersColor = [];
-let allMarker = []
+let allMarker = [];
 let marker;
-let flightPaths = new Map()
-let flightPath
+let flightPaths = new Map();
+let flightPath;
 
 if (typeof $ === 'undefined') {
     alert('jQuery must be included.');
@@ -25,10 +25,10 @@ $(document).ready(function () {
         // Prevent default behavior (Prevent file from being opened)
         e.preventDefault();
         e.stopPropagation();
-    })
+    });
 
     $(".flights").on('dragenter', flightsDragHandler);
-    $(".flights").on('dragleave dragend drop', flightsDragEndHandler)
+    $(".flights").on('dragleave dragend drop', flightsDragEndHandler);
     $(".flights").on('drop', flightsDropHandler);
 
 });
@@ -61,7 +61,7 @@ function updateFlightsTables() {
 
                 // insert new flights to tables
                 for (const flight of flights) {
-                    if (flight == null) {
+                    if (flight === null) {
                         continue;
                     }
 
@@ -86,26 +86,26 @@ function updateFlightsTables() {
 
                         // remove the flight from table
                         $("#" + flightId).remove();
-                       
+
                         ////delete all route 
                         //for (let [key, value] of flightPaths.entries()) {
                         //    value.setMap(null);
                         //}
 
-                    
+
                         // delete route
                         for (let [key, value] of flightPaths.entries()) {
-                            if (key == flightId) {
+                            if (key === flightId) {
                                 value.setMap(null);
                                 flightPaths.delete(key)
                             }
                         }
-                    
-                        
+
+
 
                         //remove marker on the map
                         for (let i = 0; i < allMarker.length; i++) {
-                            if (allMarker[i].get('store_id') == flightId) {
+                            if (allMarker[i].get('store_id') === flightId) {
                                 allMarker[i].setMap(null);
                                 //remove from array
                                 allMarker.splice(i, 1);
@@ -140,7 +140,10 @@ function addNewFlightPlan(flightPlanText) {
                 alert("file uploaded successfuly");
                 updateFlightsTables();
             },
-            error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
+            error: function (request) {
+                alert(request.responseText);
+            }
+
         });
     }
 }
@@ -160,7 +163,7 @@ function flightToTableRowHTML(flight) {
     newRow.append(cols);
 
     return newRow;
-};
+}
 
 // update the flight information in the flight info section.
 function updateFlightInfo(flightId) {
@@ -179,7 +182,7 @@ function updateFlightInfo(flightId) {
             for (const segment of flightPlan.segments) {
                 end_time.setSeconds(end_time.getSeconds() + segment.timespan_seconds);
             }
-
+            //for flightPlan table
             $("#flight_info_id").html(flightPlan.id);
             $("#flight_info_start_loc").html(start_loc.latitude + ", " + start_loc.longitude);
             $("#flight_info_end_loc").html(end_loc.latitude + ", " + end_loc.longitude);
@@ -191,7 +194,7 @@ function updateFlightInfo(flightId) {
         error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 }
-
+//empty table
 function emptyFlightInfo() {
     $("#flight_info_id").empty();
     $("#flight_info_start_loc").empty();
@@ -222,7 +225,7 @@ function deleteFlightClick() {
             function () {
                 rowToRemove.remove();
                 alert("flight " + flightId + " was deleted successfuly");
-               
+
             },
         error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
@@ -247,10 +250,10 @@ function flightsDropHandler(ev) {
         const reader = new FileReader();
         reader.onload = function (evt) {
             addNewFlightPlan(evt.target.result);
-        }
+        };
         reader.onerror = function (evt) {
             console.log("error reading file");
-        }
+        };
         reader.readAsText(file);
     }
 }
@@ -335,8 +338,9 @@ function isJson(text) {
 
 //add marker
 function addMarker(myLatLng, data) {
-    var infoWindow = new google.maps.InfoWindow();
-    var contentString;
+    let infoWindow = new google.maps.InfoWindow();
+    let contentString;
+    //pop up window marker
     contentString = "Flight ID:" + data.flight_id + "</br>Company Name:" + data.company_name;
     if (markersColor.includes(data.flight_id)) {
         marker = new google.maps.Marker({
@@ -350,6 +354,7 @@ function addMarker(myLatLng, data) {
         infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + contentString + "</div>");
         infoWindow.open(map, marker);
     }
+    //if the marker click
     else {
         marker = new google.maps.Marker({
             map: map,
@@ -396,16 +401,12 @@ function addMarker(myLatLng, data) {
             if (infoWindow) infoWindow.close();
             emptyFlightInfo()
             for (let [key, value] of flightPaths.entries()) {
-                if (key == marker.get('store_id')) {
+                if (key === marker.get('store_id')) {
                     value.setMap(null);
                 }
             }
-
-
         });
-
     })(marker, data);
-
 }
 // bold the flight with id 'flightId'.
 function flightBoldMap(flightId) {
@@ -417,7 +418,6 @@ function flightBoldMap(flightId) {
         const boldedRowFlightId = boldedRow.firstChild.textContent;
         flightUnbold(boldedRowFlightId);
     }
-
     $("#" + flightId).attr("bold", "");
     updateFlightInfo(flightId);
 }
@@ -431,35 +431,33 @@ function polyline(item, map, flight_id) {
         dataType: 'json',
         success: function (data) {
             //Accessing dynamically multi levels object
-            var level = "initial_location.latitude";
+            let level = "initial_location.latitude";
             level = level.split(".");
-            var currentObjState = data;
-            for (var i = 0; i < level.length; i++) {
+            let currentObjState = data;
+            for (let i = 0; i < level.length; i++) {
                 currentObjState = currentObjState[level[i]];
             }
-            var level2 = "initial_location.longitude";
+            let level2 = "initial_location.longitude";
             level2 = level2.split(".");
-            var currentObjState2 = data;
-            for (var i = 0; i < level2.length; i++) {
+            let currentObjState2 = data;
+            for ( i = 0; i < level2.length; i++) {
                 currentObjState2 = currentObjState2[level2[i]];
             }
             myMap.set(currentObjState, currentObjState2)
-            console.log(currentObjState);
-
+            //console.log(currentObjState);
             $.grep(data.segments, function (item) {
                 myMap.set(item.latitude, item.longitude)
             });
+            /*
             for (let [key, value] of myMap.entries()) {
                 console.log(key + ' = ' + value)
             }
-
-
+            */
             //coord for the rotue
-            var coord = [];
+            let coord = [];
             for (let [key, value] of myMap.entries()) {
                 coord.push(new google.maps.LatLng(key, value));
             }
-
             flightPath = new google.maps.Polyline({
                 path: coord,
                 geodesic: true,
@@ -474,8 +472,8 @@ function polyline(item, map, flight_id) {
 }
 function updateMarker(flightId) {
     const url = "/api/FlightPlan/" + flightId;
-    var infoWindow = new google.maps.InfoWindow();
-    var contentString;
+    let infoWindow = new google.maps.InfoWindow();
+    let contentString;
     $.ajax({
         type: "GET",
         url: url,
@@ -493,7 +491,7 @@ function updateMarker(flightId) {
             }
             contentString = "Flight ID:" + flightId + "</br>Company Name:" + flight.company_name;
             for (i = 0; i < allMarker.length; i++) {
-                if (allMarker[i].get('store_id') == flightId) {
+                if (allMarker[i].get('store_id') === flightId) {
                     //Change the marker icon
                     allMarker[i].setIcon('https://www.google.com/mapfiles/marker_green.png');
                     markersColor.push(flightId);
