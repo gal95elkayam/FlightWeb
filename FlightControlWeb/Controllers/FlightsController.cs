@@ -22,56 +22,6 @@ namespace FlightControlWeb.Controllers
             _context = context;
         }
 
-        //// GET: api/Flights
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Flight>>> GetFlights()
-        //{
-        //    return await _context.Flights.ToListAsync();
-        //}
-
-        //// GET: api/Flights/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Flight>> GetFlight(string id)
-        //{
-        //    var flight = await _context.Flights.FindAsync(id);
-
-        //    if (flight == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return flight;
-        //}
-
-        //[HttpGet]
-        //[Obsolete]
-        //public async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
-        //{
-        //    if (relative_to == null)
-        //    {
-        //        return flightManager.flights; /////cange it to notFount() !!!!!!!! just for tests
-        //    }
-        //    string urlRequest = Request.QueryString.Value;
-        //    DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0, 20)));
-        //    List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
-
-        //    var resultList = new List<Flight>();
-        //    foreach (FlightPlan flightPlan in flightsList)
-        //    {
-        //        resultList.Add(await flightManager.fromInternal(relativeDate, flightPlan, _context));
-        //    }
-        //    if (urlRequest.Contains("&sync_all"))
-        //    {
-        //        var fromExt = await flightManager.fromExternal(relativeDate, _context);
-        //        foreach (Flight f in fromExt)
-        //        {
-        //            resultList.Add(f);
-        //        }
-        //    }
-        //    return resultList;
-        //}
-
-
         [HttpGet]
         [Obsolete]
         public virtual async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
