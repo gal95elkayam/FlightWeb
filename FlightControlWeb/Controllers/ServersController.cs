@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FlightControlWeb.Models;
@@ -51,6 +49,7 @@ namespace FlightControlWeb.Controllers
 
             return CreatedAtAction("GetServer", new { id = server.ServerId }, server);
         }
+
 
         // DELETE: api/Servers/5
         [HttpDelete("{id}")]

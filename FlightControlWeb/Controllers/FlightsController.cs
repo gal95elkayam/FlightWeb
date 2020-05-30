@@ -9,7 +9,6 @@ using FlightControlWeb.Models;
 namespace FlightControlWeb.Controllers
 {
 
-
     [Route("api/[controller]")]
     [ApiController]
     public class FlightsController : ControllerBase
@@ -51,7 +50,7 @@ namespace FlightControlWeb.Controllers
             // if there is no relative_to
             if (relative_to == null || !isValidRelativeTime(relative_to))
             {
-                return BadRequest();
+               return BadRequest();
             }
             
             DateTime relativeDate = TimeZoneInfo.

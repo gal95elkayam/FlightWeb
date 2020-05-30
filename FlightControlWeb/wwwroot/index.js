@@ -1,4 +1,4 @@
-const updateDelay = 1000;
+const updateDelay = 500;
 let flightsId = [];
 let dragEventCounter = 0;
 let map;
@@ -119,7 +119,10 @@ function updateFlightsTables() {
 
                 flightsId = newFlightsId;
             },
-        error: function (xhr) { alert("Request Error!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
+        error: function (request) {
+            alert(request.responseText);
+        }
+        //error: function (xhr) { alert("Request Error!!\nURL: " + url + "\nError: " + xhr.status + " - " + xhr.title); },
     });
 }
 
