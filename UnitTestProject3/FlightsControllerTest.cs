@@ -45,9 +45,11 @@ namespace UnitTestProject
 
             // Act
             ActionResult<FlightPlan> post = await systemToTest.PostFlightPlan(fStub);
-            ActionResult<IEnumerable<FlightPlan>> get = await systemToTest.GetFlightPlan((post.Result as CreatedAtActionResult).Value);
+            ActionResult<IEnumerable<FlightPlan>> get = 
+                await systemToTest.GetFlightPlan((post.Result as CreatedAtActionResult).Value);
             // Assert
-            Assert.IsTrue(((FlightPlan)(post.Result as CreatedAtActionResult).Value) == get.Value.ToList()[0]);
+            Assert.IsTrue(((FlightPlan)(post.Result as CreatedAtActionResult).Value) ==
+                get.Value.ToList()[0]);
         }
 
         [TestMethod]
