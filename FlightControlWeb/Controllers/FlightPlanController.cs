@@ -166,7 +166,7 @@ namespace FlightControlWeb.Controllers
                 flightPlan.Initial_location.Longitude > 180 ||
                 thereIsAInvaldSegment(flightPlan.Segments))
             {
-                Response.StatusCode = 500;
+                Response.StatusCode = 422;
                 return Content("Invalid data");
                 //return BadRequest();
             }

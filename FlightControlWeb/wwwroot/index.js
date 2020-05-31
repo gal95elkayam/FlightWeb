@@ -144,7 +144,7 @@ function addNewFlightPlan(flightPlanText) {
                 updateFlightsTables();
             },
             error: function (request) {
-                alert(request.responseText);
+                alert(request.responseText + ". status code: 422");
             }
 
         });
