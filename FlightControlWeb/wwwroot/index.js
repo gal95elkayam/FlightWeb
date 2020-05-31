@@ -283,18 +283,9 @@ function flightsDragEndHandler(ev) {
 
 // bold the flight with id 'flightId'.
 function flightBold(flightId) {
-    if (flightIsBold(flightId)) {
-        return;
-    }
-
-    for (const boldedRow of flightsBoldedRows()) {
-        const boldedRowFlightId = boldedRow.firstChild.textContent;
-        flightUnbold(boldedRowFlightId);
-    }
-
-    $("#" + flightId).attr("bold", "");
-    updateFlightInfo(flightId);
-
+     /////////////////////////////////////////////////////////////////////
+    flightBoldMap(flightId);
+    ////////////////////////////////////////////////////////////////////////
     // bold route
     updateMarker(flightId)
 }
