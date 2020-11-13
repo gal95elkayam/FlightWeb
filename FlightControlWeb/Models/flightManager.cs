@@ -15,6 +15,7 @@ namespace FlightControlWeb.Models
 
         // Return the initial location of the filght
         private Location getInitialLocation(FlightPlan flight, DBContext context)
+
         {
             List<Location> locations = context.Locations.ToList();
             foreach (Location l in locations)
@@ -230,10 +231,13 @@ namespace FlightControlWeb.Models
                     int endCompRel = DateTime.Compare(relativeDate, end);
                     checkIfCurrSegment(begin, end, longBegin, latBegin, beginCompRel, endCompRel, 
                         relativeDate, flightFromPlan, s);
+
                 }
                 longBegin = s.Longitude;
                 latBegin = s.Latitude;
             }
+
+        }
 
         }
 
@@ -247,6 +251,42 @@ namespace FlightControlWeb.Models
             flightFromPlan.company_name = flightPlan.company_name;
             flightFromPlan.date_time = getInitialLocation(flightPlan, context).date_time;
             return flightFromPlan;
+        }
+        public void AddFlight(FlightPlan flightplan)
+        {
+
+            throw new NotImplementedException();
+        }
+
+        public void AddFlight(Flight flightplan)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Flight> GetAllFlight()
+        {
+            return flights;
+        }
+
+        public FlightPlan GetFlightById(object key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(object key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void
+            Flight(object key)
+        {
+            throw new NotImplementedException();
         }
     }
 
