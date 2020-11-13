@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\yuval\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\yuval\\.nuget\\packages"
+    ]
+  }
+}

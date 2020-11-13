@@ -1,0 +1,151 @@
+﻿/* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+#map {
+    height: 100%;
+    width: 100%;
+}
+/* Optional: Makes the sample page fill the window. */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+
+/* Just common table stuff. Really. */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+
+th {
+    background: #eee;
+}
+
+.grid-container {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    grid-template-rows: 1fr;
+    gap: 1px 1px;
+    grid-template-areas: "map_info flights";
+}
+
+.map_info {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1.5fr 0.5fr;
+    gap: 1px 1px;
+    grid-template-areas: "map" "info";
+    grid-area: map_info;
+}
+
+.info {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 1px 1px;
+    grid-template-areas: "flight_id flight_id ." "start_location start_time company" "end_location end_time passengers";
+    grid-area: info;
+}
+
+.flight_id {
+    grid-area: flight_id;
+}
+
+.start_location {
+    grid-area: start_location;
+}
+
+.end_location {
+    grid-area: end_location;
+}
+
+.start_time {
+    grid-area: start_time;
+}
+
+.end_time {
+    grid-area: end_time;
+}
+
+.company {
+    grid-area: company;
+}
+
+.passengers {
+    grid-area: passengers;
+}
+
+.map {
+    grid-area: map;
+}
+
+.flights {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1px 1px;
+    grid-template-areas: "internal" "external";
+    overflow: auto;
+    grid-area: flights;
+}
+
+    .flights td {
+        cursor: pointer;
+    }
+
+.internal {
+    height: 100%;
+    overflow-y: auto;
+    grid-area: internal;
+}
+
+    .internal thead th {
+        position: sticky;
+        top: 0;
+    }
+
+
+
+.external {
+    height: 100%;
+    overflow-y: auto;
+    grid-area: external;
+}
+
+    .external thead th {
+        position: sticky;
+        top: 0;
+    }
+
+
+#drop_zone {
+    border: 5px solid blue;
+    width: 200px;
+    height: 100px;
+}
+
+tr[bold] {
+    font-weight: bold;
+}
+
+.drop_box {
+    height: 200%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 3px dashed rgb(0, 0, 0);
+}
+
+.gm-ui-hover-effect {
+    display: none !important;
+}

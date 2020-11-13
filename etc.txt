@@ -1,0 +1,13 @@
+209323385,Yuval Sirotkin
+318663531, Hadar Goldberger
+311007256, Sarah De Paz
+313532178, Gal Elkayam
+
+unitests:
+1. TestGetPlightPlan - A general test that check if getFlightPlan function work correctly.
+validation tests:
+2. TestGetPlightPlanWithNullCompany - A test that makes sure that missing information 
+(comapny name) returns an error.
+3. TestInvalidDateTime - A test that verifies that invalid date time returns an error.
+4. TestInvalidNumOfPass - A test that verifies negative numbers of passengers returns an error.
+5. TestInvalidLocation - A test that makes sure that the starting location of the flight is valid.
