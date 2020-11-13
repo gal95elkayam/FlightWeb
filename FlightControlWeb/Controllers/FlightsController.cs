@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FlightControlWeb.Models;
@@ -22,73 +21,54 @@ namespace FlightControlWeb.Controllers
             _context = context;
         }
 
-        //// GET: api/Flights
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Flight>>> GetFlights()
-        //{
-        //    return await _context.Flights.ToListAsync();
-        //}
+        // Returns true if the relative time is valid
+        private bool isValidRelativeTime(string relative_to)
+        {
+            if (relative_to.Length != 20)
+            {
+                return false;
+            }
+            try
+            {
+                DateTime relativeDate = TimeZoneInfo.
+                ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0, 20)));
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
 
-        //// GET: api/Flights/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Flight>> GetFlight(string id)
-        //{
-        //    var flight = await _context.Flights.FindAsync(id);
-
-        //    if (flight == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return flight;
-        //}
-
-        //[HttpGet]
-        //[Obsolete]
-        //public async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
-        //{
-        //    if (relative_to == null)
-        //    {
-        //        return flightManager.flights; /////cange it to notFount() !!!!!!!! just for tests
-        //    }
-        //    string urlRequest = Request.QueryString.Value;
-        //    DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0, 20)));
-        //    List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
-
-        //    var resultList = new List<Flight>();
-        //    foreach (FlightPlan flightPlan in flightsList)
-        //    {
-        //        resultList.Add(await flightManager.fromInternal(relativeDate, flightPlan, _context));
-        //    }
-        //    if (urlRequest.Contains("&sync_all"))
-        //    {
-        //        var fromExt = await flightManager.fromExternal(relativeDate, _context);
-        //        foreach (Flight f in fromExt)
-        //        {
-        //            resultList.Add(f);
-        //        }
-        //    }
-        //    return resultList;
-        //}
-
-
+        // get flight according to relative time
         [HttpGet]
         [Obsolete]
-        public async Task<ActionResult<IEnumerable<Flight>>> GetFlight([FromQuery] string relative_to)
+        public virtual async Task<ActionResult<IEnumerable<Flight>>> 
+            GetFlight([FromQuery] string relative_to)
         {
-            if (relative_to == null)
-            {
-                return flightManager.flights ; /////cange it to notFount() !!!!!!!! just for tests
-            }
             string urlRequest = Request.QueryString.Value;
-            DateTime relativeDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0,20)));
-            List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
+            // if there is no relative_to
+            if (relative_to == null || !isValidRelativeTime(relative_to))
+            {
+               return BadRequest();
+            }
             
-            var resultList = new List<Flight>();
+            DateTime relativeDate = TimeZoneInfo.
+                ConvertTimeToUtc(DateTime.Parse(relative_to.Substring(0,20)));
+            List<FlightPlan> flightsList = await _context.FlightPlan.ToListAsync();
+
+            List<Flight> resultList = new List<Flight>();
+            // add to list every internal flight that is flying now
             foreach (FlightPlan flightPlan in flightsList)
             {
-                resultList.Add(await flightManager.fromInternal(relativeDate, flightPlan, _context));     
+                Flight toAdd=await flightManager.fromInternal(relativeDate, flightPlan, _context);
+                if (toAdd != null)
+                {
+                    resultList.Add(toAdd);
+                }
+                  
             }
+            // add to list every external flight that is flying now
             if (urlRequest.Contains("&sync_all"))
             {
                 var fromExt = await flightManager.fromExternal(relativeDate, _context);
@@ -101,51 +81,6 @@ namespace FlightControlWeb.Controllers
         }
 
 
-
-        // PUT: api/Flights/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlight(string id, Flight flight)
-        {
-            if (id != flight.flight_id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(flight).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FlightExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Flights
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Flight>> PostFlight(Flight flight)
-        {
-            _context.Flights.Add(flight);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFlight", new { id = flight.flight_id }, flight);
-        }
-
         // DELETE: api/Flights/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<FlightPlan>> DeleteFlight(string id)
@@ -157,6 +92,7 @@ namespace FlightControlWeb.Controllers
                 return NotFound();
             }
 
+            //remove the flight from DB
             _context.FlightPlan.Remove(flightPlan);
             await _context.SaveChangesAsync();
 

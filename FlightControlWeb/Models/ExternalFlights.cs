@@ -11,5 +11,6 @@ namespace FlightControlWeb.Models
         [Key]
         public string flightId { get; set; }
         public string serverId { get; set; }
+        public string serverUrl { get; set; }
     }
 }
